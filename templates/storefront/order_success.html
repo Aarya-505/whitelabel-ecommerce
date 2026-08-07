@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Confirmation #{{ order.order_number }} | Aura Storefront{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 rounded-4 shadow-sm p-4 p-md-5 text-center mb-4">
+                <div class="display-3 text-success mb-3"><i class="fa-solid fa-circle-check"></i></div>
+                <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 fw-semibold mx-auto mb-2">ORDER CONFIRMED</span>
+                <h2 class="fw-extrabold mb-2">Thank You, {{ order.customer_name }}!</h2>
+                <p class="text-muted mb-4">Your order <strong>#{{ order.order_number }}</strong> has been placed and is now being processed.</p>
+
+                <div class="bg-light rounded-4 p-3 d-inline-flex flex-wrap align-items-center justify-content-center gap-4 text-start mx-auto mb-4 border">
+                    <div>
+                        <small class="text-muted d-block">Order Number</small>
+                        <span class="fw-bold">{{ order.order_number }}</span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Order Date</small>
+                        <span class="fw-bold">{{ order.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Status</small>
+                        <span class="badge bg-warning text-dark rounded-pill px-3">{{ order.status }}</span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Total Paid</small>
+                        <span class="fw-bold text-primary">${{ order.total_amount }}</span>
+                    </div>
+                </div>
+
+                <!-- Order Line Items Breakdown -->
+                <div class="text-start mb-4">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">Item Summary</h5>
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Item</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if item.product %}
+                                            <img src="{{ item.product.image_url }}" alt="{{ item.product.title }}" class="rounded-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                            <span class="fw-semibold">{{ item.product.title }}</span>
+                                            {% else %}
+                                            <span class="fw-semibold text-muted">Item (Removed)</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="text-center">{{ item.quantity }}</td>
+                                    <td class="text-end">${{ item.price_at_purchase }}</td>
+                                    <td class="text-end fw-bold">${{ item.subtotal }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="text-start bg-light rounded-4 p-4 mb-4 border">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-2">Shipping Information</h6>
+                    <p class="mb-1 fw-bold">{{ order.customer_name }}</p>
+                    <p class="mb-1 text-muted">{{ order.shipping_address }}</p>
+                    <p class="mb-1 text-muted">{{ order.city }}, {{ order.postal_code }}</p>
+                    <p class="mb-0 text-muted"><i class="fa-regular fa-envelope me-1"></i> {{ order.customer_email }}</p>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'storefront:home' %}" class="btn btn-primary-custom rounded-pill px-4">
+                        <i class="fa-solid fa-house me-2"></i> Return to Store
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

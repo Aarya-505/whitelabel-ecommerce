@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.title }} | Aura Storefront{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'storefront:home' %}" class="text-decoration-none">Home</a></li>
+            {% if product.category %}
+            <li class="breadcrumb-item"><a href="{% url 'storefront:home' %}?category={{ product.category.slug }}" class="text-decoration-none">{{ product.category.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ product.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <!-- Image Preview -->
+        <div class="col-lg-6">
+            <div class="card border-0 rounded-4 overflow-hidden shadow-sm">
+                <img src="{{ product.image_url }}" alt="{{ product.title }}" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;">
+            </div>
+        </div>
+
+        <!-- Product Information -->
+        <div class="col-lg-6 d-flex flex-column justify-content-center">
+            <div class="mb-3">
+                {% if product.category %}
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold mb-2">{{ product.category.name }}</span>
+                {% endif %}
+                <h1 class="display-6 fw-extrabold mb-2">{{ product.title }}</h1>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span class="display-6 fw-bold text-primary">${{ product.price }}</span>
+                    {% if product.in_stock %}
+                        {% if product.is_low_stock %}
+                        <span class="badge badge-low-stock rounded-pill px-3 py-2"><i class="fa-solid fa-triangle-exclamation me-1"></i> Low Stock (Only {{ product.stock_quantity }} remaining)</span>
+                        {% else %}
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2"><i class="fa-solid fa-circle-check me-1"></i> In Stock ({{ product.stock_quantity }} available)</span>
+                        {% endif %}
+                    {% else %}
+                    <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2"><i class="fa-solid fa-circle-xmark me-1"></i> Out of Stock</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <hr class="my-3 text-muted">
+
+            <div class="mb-4">
+                <h6 class="fw-bold text-uppercase text-muted small">Description</h6>
+                <p class="text-secondary leading-relaxed mb-0" style="white-space: pre-line;">{{ product.description }}</p>
+            </div>
+
+            {% if product.in_stock %}
+            <form action="{% url 'cart:cart_add' product_id=product.id %}" method="POST" class="mb-4">
+                {% csrf_token %}
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="quantitySelect" class="form-label fw-semibold small text-muted mb-1">Quantity</label>
+                        <select id="quantitySelect" name="quantity" class="form-select rounded-pill px-3 shadow-none">
+                            {% for i in "x"|rjust:product.stock_quantity %}
+                                {% if forloop.counter <= 10 %}
+                                <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label d-block mb-1">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary-custom btn-lg w-100 rounded-pill shadow">
+                            <i class="fa-solid fa-bag-shopping me-2"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </form>
+            {% else %}
+            <div class="alert alert-secondary rounded-4 mb-4">
+                <i class="fa-solid fa-circle-info me-2"></i> This product is currently out of stock. Please check back later.
+            </div>
+            {% endif %}
+
+            <div class="row g-3 pt-3 text-muted small border-top">
+                <div class="col-6"><i class="fa-solid fa-truck-fast me-2 text-primary"></i> Fast Doorstep Delivery</div>
+                <div class="col-6"><i class="fa-solid fa-arrow-rotate-left me-2 text-primary"></i> 30-Day Easy Returns</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="mt-5 pt-5 border-top">
+        <h4 class="fw-bold mb-4">You Might Also Like</h4>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+            {% for item in related_products %}
+            <div class="col">
+                <div class="product-card">
+                    <div class="product-img-container">
+                        <a href="{% url 'storefront:product_detail' slug=item.slug %}">
+                            <img src="{{ item.image_url }}" alt="{{ item.title }}" class="product-img">
+                        </a>
+                    </div>
+                    <div class="product-card-body">
+                        <h6 class="fw-bold text-truncate mb-1">
+                            <a href="{% url 'storefront:product_detail' slug=item.slug %}" class="text-decoration-none text-dark">{{ item.title }}</a>
+                        </h6>
+                        <span class="fw-bold text-primary">${{ item.price }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

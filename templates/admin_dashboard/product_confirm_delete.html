@@ -1,0 +1,25 @@
+{% extends 'admin_dashboard/base_admin.html' %}
+
+{% block title %}Delete Product | Aura Admin{% endblock %}
+
+{% block admin_content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-6">
+        <div class="card border-danger rounded-4 shadow-sm p-4 text-center">
+            <div class="display-4 text-danger mb-3"><i class="fa-solid fa-trash-can"></i></div>
+            <h4 class="fw-bold mb-2">Delete "{{ product.title }}"?</h4>
+            <p class="text-muted mb-4">Are you sure you want to permanently remove this product from the store catalog? This action cannot be undone.</p>
+
+            <form action="" method="POST" class="d-flex justify-content-center gap-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger rounded-pill px-4">
+                    Yes, Delete Product
+                </button>
+                <a href="{% url 'admin_dashboard:products_list' %}" class="btn btn-light border rounded-pill px-4">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

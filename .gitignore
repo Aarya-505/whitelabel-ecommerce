@@ -1,0 +1,28 @@
+# Python & Bytecode
+*.py[cod]
+__pycache__/
+*.so
+
+# Environments
+venv/
+env/
+ENV/
+.env
+
+# Database
+db.sqlite3
+db.sqlite3-journal
+
+# Media & Uploads
+media/
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Static files collected
+staticfiles/

@@ -1,0 +1,181 @@
+{% extends 'admin_dashboard/base_admin.html' %}
+
+{% block title %}Dashboard Overview | Aura Admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h3 class="fw-extrabold mb-1">Store Overview</h3>
+        <p class="text-muted small mb-0">Real-time sales analytics, order fulfillment, and inventory metrics</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'admin_dashboard:product_add' %}" class="btn btn-primary-custom btn-sm rounded-pill">
+            <i class="fa-solid fa-plus me-1"></i> Add Product
+        </a>
+        <a href="{% url 'admin_dashboard:orders_list' %}" class="btn btn-outline-dark btn-sm rounded-pill">
+            <i class="fa-solid fa-list-check me-1"></i> View Orders
+        </a>
+    </div>
+</div>
+
+<!-- Metrics Cards Row -->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
+    <div class="col">
+        <div class="stat-card d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Total Revenue</span>
+                <h3 class="fw-bold mb-0 text-primary">${{ total_sales|floatformat:2 }}</h3>
+            </div>
+            <div class="stat-icon bg-primary-subtle text-primary">
+                <i class="fa-solid fa-dollar-sign"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="stat-card d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Active Orders</span>
+                <h3 class="fw-bold mb-0">{{ pending_orders_count }} <span class="fs-6 fw-normal text-muted">/ {{ total_orders_count }} total</span></h3>
+            </div>
+            <div class="stat-icon bg-warning-subtle text-warning">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="stat-card d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Live Catalog</span>
+                <h3 class="fw-bold mb-0">{{ active_products_count }} <span class="fs-6 fw-normal text-muted">/ {{ total_products_count }} active</span></h3>
+            </div>
+            <div class="stat-icon bg-success-subtle text-success">
+                <i class="fa-solid fa-boxes-packing"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="stat-card d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Low Stock Alert</span>
+                <h3 class="fw-bold mb-0 {% if low_stock_count > 0 %}text-danger{% else %}text-muted{% endif %}">{{ low_stock_count }} items</h3>
+            </div>
+            <div class="stat-icon bg-danger-subtle text-danger">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Low Stock Warning Banner & Table -->
+{% if low_stock_count > 0 %}
+<div class="card border-danger border-opacity-25 rounded-4 shadow-sm mb-4">
+    <div class="card-header bg-danger-subtle border-0 rounded-top-4 py-3 d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold text-danger mb-0">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> Low Stock Alerts ({{ low_stock_count }} products need restock)
+        </h6>
+        <a href="{% url 'admin_dashboard:products_list' %}?status=low_stock" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+            Manage Inventory
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+                <tr>
+                    <th scope="col" class="ps-4">Product Title</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Stock Remaining</th>
+                    <th scope="col" class="text-end pe-4">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in low_stock_products %}
+                <tr>
+                    <td class="ps-4 fw-semibold">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="{{ item.image_url }}" alt="{{ item.title }}" class="rounded-3" style="width: 36px; height: 36px; object-fit: cover;">
+                            <span>{{ item.title }}</span>
+                        </div>
+                    </td>
+                    <td>{{ item.category.name|default:"Uncategorized" }}</td>
+                    <td>${{ item.price }}</td>
+                    <td>
+                        <span class="badge badge-low-stock rounded-pill px-3 py-1">
+                            {% if item.stock_quantity == 0 %}OUT OF STOCK{% else %}{{ item.stock_quantity }} units{% endif %}
+                        </span>
+                    </td>
+                    <td class="text-end pe-4">
+                        <a href="{% url 'admin_dashboard:product_edit' pk=item.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            <i class="fa-solid fa-pen me-1"></i> Restock
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Orders Table -->
+<div class="card border-0 rounded-4 shadow-sm">
+    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0">Recent Customer Orders</h5>
+        <a href="{% url 'admin_dashboard:orders_list' %}" class="text-decoration-none small fw-bold text-primary">
+            View All Orders <i class="fa-solid fa-chevron-right ms-1"></i>
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+                <tr>
+                    <th scope="col" class="ps-4">Order #</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="text-end pe-4">Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                    <td class="ps-4 fw-bold text-primary">#{{ order.order_number }}</td>
+                    <td>
+                        <div class="fw-semibold">{{ order.customer_name }}</div>
+                        <small class="text-muted">{{ order.customer_email }}</small>
+                    </td>
+                    <td class="small text-muted">{{ order.created_at|date:"M d, Y H:i" }}</td>
+                    <td class="fw-bold">${{ order.total_amount }}</td>
+                    <td>
+                        {% if order.status == 'Pending' %}
+                        <span class="badge bg-warning-subtle text-warning rounded-pill px-3 py-1">Pending</span>
+                        {% elif order.status == 'Processing' %}
+                        <span class="badge bg-info-subtle text-info rounded-pill px-3 py-1">Processing</span>
+                        {% elif order.status == 'Shipped' %}
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1">Shipped</span>
+                        {% elif order.status == 'Delivered' %}
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1">Delivered</span>
+                        {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1">{{ order.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                        <a href="{% url 'admin_dashboard:order_detail' pk=order.pk %}" class="btn btn-sm btn-light border rounded-pill px-3">
+                            View <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">No orders placed yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

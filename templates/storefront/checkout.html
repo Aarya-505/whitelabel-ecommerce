@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout | Aura Storefront{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <h2 class="fw-extrabold mb-4"><i class="fa-solid fa-lock text-primary me-2"></i> Checkout</h2>
+
+    <form action="{% url 'storefront:checkout' %}" method="POST" id="checkoutForm">
+        {% csrf_token %}
+        <div class="row g-4">
+            <!-- Left Column: Shipping & Payment Info -->
+            <div class="col-lg-7">
+                <!-- Customer Information -->
+                <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fa-regular fa-user text-primary me-2"></i> Contact Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="customer_name" class="form-label small fw-semibold">Full Name *</label>
+                            <input type="text" id="customer_name" name="customer_name" class="form-control rounded-3" placeholder="Jane Doe" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="customer_email" class="form-label small fw-semibold">Email Address *</label>
+                            <input type="email" id="customer_email" name="customer_email" class="form-control rounded-3" placeholder="jane@example.com" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="customer_phone" class="form-label small fw-semibold">Phone Number</label>
+                            <input type="tel" id="customer_phone" name="customer_phone" class="form-control rounded-3" placeholder="+1 (555) 019-2834">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-location-dot text-primary me-2"></i> Shipping Address</h5>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="shipping_address" class="form-label small fw-semibold">Street Address *</label>
+                            <input type="text" id="shipping_address" name="shipping_address" class="form-control rounded-3" placeholder="123 Shopping Avenue, Suite 400" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="city" class="form-label small fw-semibold">City / Region *</label>
+                            <input type="text" id="city" name="city" class="form-control rounded-3" placeholder="San Francisco" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="postal_code" class="form-label small fw-semibold">Postal / Zip Code *</label>
+                            <input type="text" id="postal_code" name="postal_code" class="form-control rounded-3" placeholder="94107" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method (Mock Gateway) -->
+                <div class="card border-0 rounded-4 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="fa-regular fa-credit-card text-primary me-2"></i> Payment Method</h5>
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1">Mock Sandbox Mode</span>
+                    </div>
+
+                    <div class="d-grid gap-3">
+                        <div class="form-check p-3 border rounded-3 bg-light">
+                            <input class="form-check-input ms-0 me-2" type="radio" name="payment_method" id="payCard" value="Credit/Debit Card (Mock)" checked>
+                            <label class="form-check-label fw-semibold" for="payCard">
+                                <i class="fa-solid fa-credit-card me-2 text-primary"></i> Credit or Debit Card
+                            </label>
+                            <div class="small text-muted mt-1 ms-4">Simulation: Any 16-digit card accepted. No actual charge will occur.</div>
+                        </div>
+
+                        <div class="form-check p-3 border rounded-3">
+                            <input class="form-check-input ms-0 me-2" type="radio" name="payment_method" id="payPaypal" value="PayPal (Mock)">
+                            <label class="form-check-label fw-semibold" for="payPaypal">
+                                <i class="fa-brands fa-paypal me-2 text-primary"></i> PayPal Express Checkout
+                            </label>
+                        </div>
+
+                        <div class="form-check p-3 border rounded-3">
+                            <input class="form-check-input ms-0 me-2" type="radio" name="payment_method" id="payCOD" value="Cash on Delivery (COD)">
+                            <label class="form-check-label fw-semibold" for="payCOD">
+                                <i class="fa-solid fa-hand-holding-dollar me-2 text-primary"></i> Cash on Delivery
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Order Items Summary -->
+            <div class="col-lg-5">
+                <div class="card border-0 rounded-4 shadow-sm p-4 sticky-top" style="top: 100px;">
+                    <h5 class="fw-bold mb-3">Items in Order</h5>
+
+                    <div class="d-grid gap-3 mb-4 max-h-300 overflow-auto">
+                        {% for item in cart %}
+                        {% with product=item.product %}
+                        <div class="d-flex align-items-center justify-content-between border-bottom pb-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="{{ product.image_url }}" alt="{{ product.title }}" class="rounded-3" style="width: 48px; height: 48px; object-fit: cover;">
+                                <div>
+                                    <h6 class="mb-0 fw-semibold text-truncate" style="max-width: 180px;">{{ product.title }}</h6>
+                                    <small class="text-muted">Qty: {{ item.quantity }} x ${{ item.price }}</small>
+                                </div>
+                            </div>
+                            <span class="fw-bold">${{ item.total_price }}</span>
+                        </div>
+                        {% endwith %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal</span>
+                        <span class="fw-semibold">${{ cart.get_total_price }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Shipping & Handling</span>
+                        <span class="text-success fw-semibold">FREE</span>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fw-bold fs-5">Total Amount</span>
+                        <span class="fw-bold fs-4 text-primary">${{ cart.get_total_price }}</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-custom btn-lg w-100 rounded-pill shadow">
+                        Complete Order <i class="fa-solid fa-circle-check ms-2"></i>
+                    </button>
+
+                    <p class="text-center text-muted small mt-3 mb-0">
+                        By placing your order, you agree to Aura Boutique's Terms of Service and Privacy Policy.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
