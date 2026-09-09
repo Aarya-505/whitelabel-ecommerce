@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Aura Storefront | Premium Shopping{% endblock %}
+{% block title %}Aura Storefront | Premium Shopping Platform{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -12,48 +12,48 @@
             <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
         </div>
         <div class="carousel-inner">
-            <!-- Slide 1 -->
+            <!-- Slide 1: Electronics -->
             <div class="carousel-item active">
                 <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1600&auto=format&fit=crop&q=80');">
                     <div class="hero-slide-overlay"></div>
                     <div class="row align-items-center position-relative z-1 w-100">
                         <div class="col-lg-7 text-white ps-md-4">
-                            <span class="badge bg-primary rounded-pill px-3 py-2 fw-bold text-uppercase mb-3">FLASH SALE &bull; 2026</span>
-                            <h1 class="display-4 fw-extrabold mb-3 text-white">Elevate Your Everyday Essentials.</h1>
-                            <p class="lead text-white-50 mb-4">Discover studio-grade audio gear and premium electronics designed for modern lifestyles.</p>
-                            <a href="#products-section" class="btn btn-light btn-lg rounded-pill px-4 fw-bold text-primary shadow-sm">
-                                Explore Collection <i class="fa-solid fa-arrow-right ms-2"></i>
+                            <span class="badge bg-primary rounded-pill px-3 py-2 fw-bold text-uppercase mb-3 shadow"><i class="fa-solid fa-bolt me-1"></i> FLASH SALE &bull; UP TO 40% OFF</span>
+                            <h1 class="display-3 fw-extrabold mb-3 text-white">Next-Gen Audio & Desk Gear.</h1>
+                            <p class="lead text-white-50 mb-4">Experience studio-grade active noise-canceling headphones, tactile mechanical keyboards, and ambient desk setups.</p>
+                            <a href="{% url 'storefront:home' %}?category=electronics#products-section" class="btn btn-light btn-lg rounded-pill px-4 fw-bold text-primary shadow-sm">
+                                Shop Electronics <i class="fa-solid fa-arrow-right ms-2"></i>
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Slide 2 -->
+            <!-- Slide 2: Apparel -->
             <div class="carousel-item">
                 <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=1600&auto=format&fit=crop&q=80');">
                     <div class="hero-slide-overlay"></div>
                     <div class="row align-items-center position-relative z-1 w-100">
                         <div class="col-lg-7 text-white ps-md-4">
-                            <span class="badge bg-success rounded-pill px-3 py-2 fw-bold text-uppercase mb-3">NEW ARRIVALS</span>
-                            <h1 class="display-4 fw-extrabold mb-3 text-white">Sustainable Luxury Apparel.</h1>
-                            <p class="lead text-white-50 mb-4">Handcrafted 450 GSM organic cotton streetwear engineered for comfort and durability.</p>
-                            <a href="{% url 'storefront:home' %}?category=apparel" class="btn btn-light btn-lg rounded-pill px-4 fw-bold text-dark shadow-sm">
-                                Shop Apparel <i class="fa-solid fa-arrow-right ms-2"></i>
+                            <span class="badge bg-success rounded-pill px-3 py-2 fw-bold text-uppercase mb-3 shadow"><i class="fa-solid fa-leaf me-1"></i> ORGANIC COLLECTION</span>
+                            <h1 class="display-3 fw-extrabold mb-3 text-white">Sustainable Luxury Apparel.</h1>
+                            <p class="lead text-white-50 mb-4">Handcrafted 450 GSM heavyweight organic cotton streetwear engineered for ultimate comfort and timeless structure.</p>
+                            <a href="{% url 'storefront:home' %}?category=apparel#products-section" class="btn btn-light btn-lg rounded-pill px-4 fw-bold text-dark shadow-sm">
+                                Explore Apparel <i class="fa-solid fa-arrow-right ms-2"></i>
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Slide 3 -->
+            <!-- Slide 3: Home & Living -->
             <div class="carousel-item">
                 <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1600&auto=format&fit=crop&q=80');">
                     <div class="hero-slide-overlay"></div>
                     <div class="row align-items-center position-relative z-1 w-100">
                         <div class="col-lg-7 text-white ps-md-4">
-                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold text-uppercase mb-3">CURATED DECOR</span>
-                            <h1 class="display-4 fw-extrabold mb-3 text-white">Minimalist Workspace & Home.</h1>
-                            <p class="lead text-white-50 mb-4">Sleek ceramic mugs, smart ambient lighting, and functional desk accents.</p>
-                            <a href="{% url 'storefront:home' %}?category=home-living" class="btn btn-light btn-lg rounded-pill px-4 fw-bold text-dark shadow-sm">
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold text-uppercase mb-3 shadow"><i class="fa-solid fa-house me-1"></i> MODERN LIVING</span>
+                            <h1 class="display-3 fw-extrabold mb-3 text-white">Minimalist Workspace Aesthetics.</h1>
+                            <p class="lead text-white-50 mb-4">Ergonomic matte ceramic drinkware, smart ambient lighting, and essential EDC accessories.</p>
+                            <a href="{% url 'storefront:home' %}?category=home-living#products-section" class="btn btn-light btn-lg rounded-pill px-4 fw-bold text-dark shadow-sm">
                                 View Home Catalog <i class="fa-solid fa-arrow-right ms-2"></i>
                             </a>
                         </div>
@@ -82,7 +82,7 @@
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
             {% for cat in categories %}
             <div class="col">
-                <a href="{% url 'storefront:home' %}?category={{ cat.slug }}" class="category-card">
+                <a href="{% url 'storefront:home' %}?category={{ cat.slug }}#products-section" class="category-card">
                     <img src="{{ cat.image_url }}" alt="{{ cat.name }}" class="category-card-img">
                     <div class="category-card-overlay">
                         <h4 class="fw-bold mb-1 text-white">{{ cat.name }}</h4>
@@ -96,21 +96,26 @@
         </div>
     </div>
 
-    <!-- Featured Products (Horizontal Scrollable Row) -->
-    {% if featured_products %}
-    <div class="mb-5 pt-3">
-        <div class="d-flex justify-content-between align-items-end mb-3">
+    <!-- Horizontal Scroll Section 1: Trending Products -->
+    {% if trending_products %}
+    <div class="mb-5 pt-2">
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <span class="text-primary fw-bold text-uppercase small tracking-wide"><i class="fa-solid fa-fire text-danger me-1"></i> TRENDING NOW</span>
-                <h3 class="fw-extrabold mb-0">Featured Products</h3>
+                <span class="text-primary fw-bold text-uppercase small tracking-wide"><i class="fa-solid fa-fire text-danger me-1"></i> TOP SELLING</span>
+                <h3 class="fw-extrabold mb-0">Trending Products</h3>
             </div>
-            <div class="small text-muted d-none d-md-block">
-                <i class="fa-solid fa-arrows-left-right me-1"></i> Scroll horizontally to explore
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm rounded-circle px-2 py-1" onclick="scrollHorizontal('trendingScrollRow', -300)">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-outline-secondary btn-sm rounded-circle px-2 py-1" onclick="scrollHorizontal('trendingScrollRow', 300)">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
             </div>
         </div>
 
-        <div class="horizontal-scroll-row">
-            {% for product in featured_products %}
+        <div id="trendingScrollRow" class="horizontal-scroll-row">
+            {% for product in trending_products %}
             <div class="horizontal-scroll-item">
                 <div class="product-card">
                     <div class="product-img-container">
@@ -124,11 +129,71 @@
                         {% endif %}
                     </div>
                     <div class="product-card-body">
-                        <h6 class="fw-bold text-truncate mb-2">
+                        <h6 class="fw-bold text-truncate mb-1">
                             <a href="{% url 'storefront:product_detail' slug=product.slug %}" class="text-decoration-none text-dark">
                                 {{ product.title }}
                             </a>
                         </h6>
+                        {% if product.subcategory %}
+                        <span class="badge bg-light text-muted border rounded-pill px-2 py-1 mb-2 align-self-start small">
+                            {{ product.subcategory.name }}
+                        </span>
+                        {% endif %}
+                        <div class="d-flex align-items-center justify-content-between pt-2 mt-auto border-top">
+                            <span class="product-price">${{ product.price }}</span>
+                            <a href="{% url 'storefront:product_detail' slug=product.slug %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Horizontal Scroll Section 2: New Arrivals -->
+    {% if new_arrivals %}
+    <div class="mb-5 pt-2">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <span class="text-success fw-bold text-uppercase small tracking-wide"><i class="fa-solid fa-sparkles me-1"></i> JUST IN</span>
+                <h3 class="fw-extrabold mb-0">New Arrivals</h3>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm rounded-circle px-2 py-1" onclick="scrollHorizontal('newArrivalsScrollRow', -300)">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-outline-secondary btn-sm rounded-circle px-2 py-1" onclick="scrollHorizontal('newArrivalsScrollRow', 300)">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="newArrivalsScrollRow" class="horizontal-scroll-row">
+            {% for product in new_arrivals %}
+            <div class="horizontal-scroll-item">
+                <div class="product-card">
+                    <div class="product-img-container">
+                        <a href="{% url 'storefront:product_detail' slug=product.slug %}">
+                            <img src="{{ product.image_url }}" alt="{{ product.title }}" class="product-img">
+                        </a>
+                        <span class="badge bg-success position-absolute top-0 start-0 m-3 shadow-sm rounded-pill px-3 py-2 fw-semibold">
+                            NEW
+                        </span>
+                    </div>
+                    <div class="product-card-body">
+                        <h6 class="fw-bold text-truncate mb-1">
+                            <a href="{% url 'storefront:product_detail' slug=product.slug %}" class="text-decoration-none text-dark">
+                                {{ product.title }}
+                            </a>
+                        </h6>
+                        {% if product.subcategory %}
+                        <span class="badge bg-light text-muted border rounded-pill px-2 py-1 mb-2 align-self-start small">
+                            {{ product.subcategory.name }}
+                        </span>
+                        {% endif %}
                         <div class="d-flex align-items-center justify-content-between pt-2 mt-auto border-top">
                             <span class="product-price">${{ product.price }}</span>
                             <a href="{% url 'storefront:product_detail' slug=product.slug %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
@@ -144,11 +209,11 @@
     {% endif %}
 
     <!-- Filter & Search Controls -->
-    <div id="products-section" class="mb-4 pt-3 border-top">
+    <div id="products-section" class="mb-4 pt-4 border-top">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <!-- Categories Pills -->
+            <!-- Categories & Subcategories Pills -->
             <div class="d-flex flex-wrap gap-2 align-items-center">
-                <a href="{% url 'storefront:home' %}#products-section" class="category-pill {% if not selected_category_slug %}active{% endif %}">
+                <a href="{% url 'storefront:home' %}#products-section" class="category-pill {% if not selected_category_slug and not selected_subcategory_slug %}active{% endif %}">
                     All Items
                 </a>
                 {% for category in categories %}
@@ -161,6 +226,7 @@
             <!-- Sorting Dropdown -->
             <form action="{% url 'storefront:home' %}#products-section" method="GET" class="d-flex align-items-center gap-2">
                 {% if selected_category_slug %}<input type="hidden" name="category" value="{{ selected_category_slug }}">{% endif %}
+                {% if selected_subcategory_slug %}<input type="hidden" name="subcategory" value="{{ selected_subcategory_slug }}">{% endif %}
                 {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
                 <label for="sortSelect" class="small text-muted fw-semibold text-nowrap">Sort by:</label>
                 <select id="sortSelect" name="sort" class="form-select form-select-sm rounded-pill shadow-none" onchange="this.form.submit()">
@@ -249,4 +315,14 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Helper script for smooth button-click horizontal scrolling -->
+<script>
+    function scrollHorizontal(elementId, distance) {
+        var container = document.getElementById(elementId);
+        if (container) {
+            container.scrollBy({ left: distance, behavior: 'smooth' });
+        }
+    }
+</script>
 {% endblock %}

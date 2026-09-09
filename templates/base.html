@@ -43,6 +43,31 @@
                     <li class="nav-item">
                         <a class="nav-link fw-semibold" href="{% url 'storefront:home' %}">Shop All</a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle fw-semibold" href="#" id="navbarCategoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-layer-group text-primary me-1"></i> Departments
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-3" aria-labelledby="navbarCategoryDropdown" style="min-width: 280px;">
+                            <li><a class="dropdown-item fw-bold text-primary mb-1" href="{% url 'storefront:home' %}"><i class="fa-solid fa-store me-2"></i>All Departments</a></li>
+                            <li><hr class="dropdown-divider my-2"></li>
+                            {% for cat in categories %}
+                            <li class="dropdown-header fw-extrabold text-dark fs-6 mt-2 text-uppercase tracking-wider"><i class="fa-solid fa-folder me-2 text-primary"></i>{{ cat.name }}</li>
+                            {% for subcat in cat.subcategories.all %}
+                            <li>
+                                <a class="dropdown-item ps-4 py-1 small text-muted rounded-2" href="{% url 'storefront:home' %}?subcategory={{ subcat.slug }}#products-section">
+                                    <i class="fa-solid fa-angle-right me-1 text-secondary"></i> {{ subcat.name }}
+                                </a>
+                            </li>
+                            {% empty %}
+                            <li>
+                                <a class="dropdown-item ps-4 py-1 small text-muted rounded-2" href="{% url 'storefront:home' %}?category={{ cat.slug }}#products-section">
+                                    View All {{ cat.name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link fw-semibold position-relative px-3" href="{% url 'cart:cart_detail' %}">
                             <i class="fa-solid fa-bag-shopping fs-5"></i>

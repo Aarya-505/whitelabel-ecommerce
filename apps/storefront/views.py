@@ -7,19 +7,26 @@ from apps.orders.models import Order, OrderItem
 from apps.cart.cart import Cart
 
 def home(request):
-    categories = Category.objects.all()
+    categories = Category.objects.prefetch_related('subcategories').all()
     selected_category_slug = request.GET.get('category')
+    selected_subcategory_slug = request.GET.get('subcategory')
     query = request.GET.get('q', '').strip()
     sort = request.GET.get('sort', 'newest')
 
-    products = Product.objects.filter(is_active=True)
+    products = Product.objects.filter(is_active=True).select_related('category', 'subcategory')
 
     if selected_category_slug:
         products = products.filter(category__slug=selected_category_slug)
 
+    if selected_subcategory_slug:
+        products = products.filter(subcategory__slug=selected_subcategory_slug)
+
     if query:
         products = products.filter(
-            Q(title__icontains=query) | Q(description__icontains=query) | Q(category__name__icontains=query)
+            Q(title__icontains=query) |
+            Q(description__icontains=query) |
+            Q(category__name__icontains=query) |
+            Q(subcategory__name__icontains=query)
         )
 
     if sort == 'price_low':
@@ -29,15 +36,18 @@ def home(request):
     else:
         products = products.order_by('-created_at')
 
-    featured_products = Product.objects.filter(is_active=True)[:8]
+    trending_products = Product.objects.filter(is_active=True).select_related('category', 'subcategory').order_by('-stock_quantity')[:8]
+    new_arrivals = Product.objects.filter(is_active=True).select_related('category', 'subcategory').order_by('-created_at')[:8]
 
     context = {
         'products': products,
         'categories': categories,
         'selected_category_slug': selected_category_slug,
+        'selected_subcategory_slug': selected_subcategory_slug,
         'query': query,
         'sort': sort,
-        'featured_products': featured_products,
+        'trending_products': trending_products,
+        'new_arrivals': new_arrivals,
     }
     return render(request, 'storefront/home.html', context)
 
