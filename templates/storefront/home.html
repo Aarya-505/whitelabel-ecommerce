@@ -4,40 +4,162 @@
 
 {% block content %}
 <div class="container">
-    <!-- Hero Banner -->
-    <div class="hero-banner text-center text-lg-start">
-        <div class="row align-items-center position-relative z-1">
-            <div class="col-lg-7">
-                <span class="badge bg-white text-primary rounded-pill px-3 py-2 fw-semibold mb-3">NEW COLLECTION 2026</span>
-                <h1 class="display-4 fw-extrabold mb-3">Elevate Your Everyday Essentials.</h1>
-                <p class="lead text-white-50 mb-4">Discover hand-picked premium items, crafted with attention to detail and designed to seamlessly complement your modern lifestyle.</p>
-                <a href="#products-section" class="btn btn-light btn-lg rounded-pill px-4 fw-bold text-primary shadow-sm">
-                    Explore Catalog <i class="fa-solid fa-arrow-right ms-2"></i>
+    <!-- Hero Slider (Bootstrap 5 Carousel) -->
+    <div id="heroCarousel" class="carousel slide hero-carousel mb-5" data-bs-ride="carousel" data-bs-interval="5000">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner">
+            <!-- Slide 1 -->
+            <div class="carousel-item active">
+                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1600&auto=format&fit=crop&q=80');">
+                    <div class="hero-slide-overlay"></div>
+                    <div class="row align-items-center position-relative z-1 w-100">
+                        <div class="col-lg-7 text-white ps-md-4">
+                            <span class="badge bg-primary rounded-pill px-3 py-2 fw-bold text-uppercase mb-3">FLASH SALE &bull; 2026</span>
+                            <h1 class="display-4 fw-extrabold mb-3 text-white">Elevate Your Everyday Essentials.</h1>
+                            <p class="lead text-white-50 mb-4">Discover studio-grade audio gear and premium electronics designed for modern lifestyles.</p>
+                            <a href="#products-section" class="btn btn-light btn-lg rounded-pill px-4 fw-bold text-primary shadow-sm">
+                                Explore Collection <i class="fa-solid fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 2 -->
+            <div class="carousel-item">
+                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=1600&auto=format&fit=crop&q=80');">
+                    <div class="hero-slide-overlay"></div>
+                    <div class="row align-items-center position-relative z-1 w-100">
+                        <div class="col-lg-7 text-white ps-md-4">
+                            <span class="badge bg-success rounded-pill px-3 py-2 fw-bold text-uppercase mb-3">NEW ARRIVALS</span>
+                            <h1 class="display-4 fw-extrabold mb-3 text-white">Sustainable Luxury Apparel.</h1>
+                            <p class="lead text-white-50 mb-4">Handcrafted 450 GSM organic cotton streetwear engineered for comfort and durability.</p>
+                            <a href="{% url 'storefront:home' %}?category=apparel" class="btn btn-light btn-lg rounded-pill px-4 fw-bold text-dark shadow-sm">
+                                Shop Apparel <i class="fa-solid fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="carousel-item">
+                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1600&auto=format&fit=crop&q=80');">
+                    <div class="hero-slide-overlay"></div>
+                    <div class="row align-items-center position-relative z-1 w-100">
+                        <div class="col-lg-7 text-white ps-md-4">
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold text-uppercase mb-3">CURATED DECOR</span>
+                            <h1 class="display-4 fw-extrabold mb-3 text-white">Minimalist Workspace & Home.</h1>
+                            <p class="lead text-white-50 mb-4">Sleek ceramic mugs, smart ambient lighting, and functional desk accents.</p>
+                            <a href="{% url 'storefront:home' %}?category=home-living" class="btn btn-light btn-lg rounded-pill px-4 fw-bold text-dark shadow-sm">
+                                View Home Catalog <i class="fa-solid fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+    <!-- Category Showcase Display -->
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="text-primary fw-bold text-uppercase small tracking-wide">EXPLORE DEPARTMENTS</span>
+                <h3 class="fw-extrabold mb-0">Shop by Category</h3>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+            {% for cat in categories %}
+            <div class="col">
+                <a href="{% url 'storefront:home' %}?category={{ cat.slug }}" class="category-card">
+                    <img src="{{ cat.image_url }}" alt="{{ cat.name }}" class="category-card-img">
+                    <div class="category-card-overlay">
+                        <h4 class="fw-bold mb-1 text-white">{{ cat.name }}</h4>
+                        <p class="small text-white-50 mb-0" style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ cat.description }}
+                        </p>
+                    </div>
                 </a>
             </div>
-            <div class="col-lg-5 d-none d-lg-block text-center">
-                <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&auto=format&fit=crop&q=80" alt="Hero Lifestyle" class="img-fluid rounded-4 shadow-lg border border-2 border-white border-opacity-25" style="max-height: 280px; object-fit: cover;">
-            </div>
+            {% endfor %}
         </div>
     </div>
 
+    <!-- Featured Products (Horizontal Scrollable Row) -->
+    {% if featured_products %}
+    <div class="mb-5 pt-3">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <div>
+                <span class="text-primary fw-bold text-uppercase small tracking-wide"><i class="fa-solid fa-fire text-danger me-1"></i> TRENDING NOW</span>
+                <h3 class="fw-extrabold mb-0">Featured Products</h3>
+            </div>
+            <div class="small text-muted d-none d-md-block">
+                <i class="fa-solid fa-arrows-left-right me-1"></i> Scroll horizontally to explore
+            </div>
+        </div>
+
+        <div class="horizontal-scroll-row">
+            {% for product in featured_products %}
+            <div class="horizontal-scroll-item">
+                <div class="product-card">
+                    <div class="product-img-container">
+                        <a href="{% url 'storefront:product_detail' slug=product.slug %}">
+                            <img src="{{ product.image_url }}" alt="{{ product.title }}" class="product-img">
+                        </a>
+                        {% if product.category %}
+                        <span class="badge bg-white text-dark position-absolute top-0 start-0 m-3 shadow-sm rounded-pill px-3 py-2 fw-semibold">
+                            {{ product.category.name }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="product-card-body">
+                        <h6 class="fw-bold text-truncate mb-2">
+                            <a href="{% url 'storefront:product_detail' slug=product.slug %}" class="text-decoration-none text-dark">
+                                {{ product.title }}
+                            </a>
+                        </h6>
+                        <div class="d-flex align-items-center justify-content-between pt-2 mt-auto border-top">
+                            <span class="product-price">${{ product.price }}</span>
+                            <a href="{% url 'storefront:product_detail' slug=product.slug %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Filter & Search Controls -->
-    <div id="products-section" class="mb-4">
+    <div id="products-section" class="mb-4 pt-3 border-top">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <!-- Categories -->
+            <!-- Categories Pills -->
             <div class="d-flex flex-wrap gap-2 align-items-center">
-                <a href="{% url 'storefront:home' %}" class="category-pill {% if not selected_category_slug %}active{% endif %}">
+                <a href="{% url 'storefront:home' %}#products-section" class="category-pill {% if not selected_category_slug %}active{% endif %}">
                     All Items
                 </a>
                 {% for category in categories %}
-                <a href="{% url 'storefront:home' %}?category={{ category.slug }}{% if query %}&q={{ query }}{% endif %}" class="category-pill {% if selected_category_slug == category.slug %}active{% endif %}">
+                <a href="{% url 'storefront:home' %}?category={{ category.slug }}{% if query %}&q={{ query }}{% endif %}#products-section" class="category-pill {% if selected_category_slug == category.slug %}active{% endif %}">
                     {{ category.name }}
                 </a>
                 {% endfor %}
             </div>
 
             <!-- Sorting Dropdown -->
-            <form action="{% url 'storefront:home' %}" method="GET" class="d-flex align-items-center gap-2">
+            <form action="{% url 'storefront:home' %}#products-section" method="GET" class="d-flex align-items-center gap-2">
                 {% if selected_category_slug %}<input type="hidden" name="category" value="{{ selected_category_slug }}">{% endif %}
                 {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
                 <label for="sortSelect" class="small text-muted fw-semibold text-nowrap">Sort by:</label>
@@ -59,7 +181,7 @@
 
     <!-- Product Grid -->
     {% if products %}
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
         {% for product in products %}
         <div class="col">
             <div class="product-card">
@@ -89,11 +211,16 @@
                             {{ product.title }}
                         </a>
                     </h5>
+                    {% if product.subcategory %}
+                    <span class="badge bg-light text-muted border rounded-pill px-2 py-1 mb-2 align-self-start small">
+                        {{ product.subcategory.name }}
+                    </span>
+                    {% endif %}
                     <p class="text-muted small mb-3 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                         {{ product.description }}
                     </p>
 
-                    <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                    <div class="d-flex align-items-center justify-content-between pt-2 border-top mt-auto">
                         <span class="product-price">${{ product.price }}</span>
                         {% if product.in_stock %}
                         <form action="{% url 'cart:cart_add' product_id=product.id %}" method="POST">

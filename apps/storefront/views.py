@@ -29,7 +29,7 @@ def home(request):
     else:
         products = products.order_by('-created_at')
 
-    featured_products = Product.objects.filter(is_active=True)[:4]
+    featured_products = Product.objects.filter(is_active=True)[:8]
 
     context = {
         'products': products,

@@ -11,24 +11,63 @@
             {% if product.category %}
             <li class="breadcrumb-item"><a href="{% url 'storefront:home' %}?category={{ product.category.slug }}" class="text-decoration-none">{{ product.category.name }}</a></li>
             {% endif %}
+            {% if product.subcategory %}
+            <li class="breadcrumb-item"><a href="{% url 'storefront:home' %}?category={{ product.category.slug }}" class="text-decoration-none">{{ product.subcategory.name }}</a></li>
+            {% endif %}
             <li class="breadcrumb-item active" aria-current="page">{{ product.title }}</li>
         </ol>
     </nav>
 
     <div class="row g-5">
-        <!-- Image Preview -->
+        <!-- Multi-Image Slider Gallery -->
         <div class="col-lg-6">
-            <div class="card border-0 rounded-4 overflow-hidden shadow-sm">
-                <img src="{{ product.image_url }}" alt="{{ product.title }}" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;">
+            <div id="productGalleryCarousel" class="carousel slide card border-0 rounded-4 overflow-hidden shadow-sm mb-3" data-bs-ride="false">
+                <div class="carousel-inner">
+                    {% if product.images.all %}
+                        {% for img in product.images.all %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <img src="{{ img.image_url }}" alt="{{ product.title }} - Gallery Image {{ forloop.counter }}" class="img-fluid w-100" style="height: 460px; object-fit: cover;">
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="carousel-item active">
+                            <img src="{{ product.image_url }}" alt="{{ product.title }}" class="img-fluid w-100" style="height: 460px; object-fit: cover;">
+                        </div>
+                    {% endif %}
+                </div>
+                {% if product.images.all|length > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#productGalleryCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#productGalleryCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+                {% endif %}
             </div>
+
+            <!-- Thumbnail Gallery Row -->
+            {% if product.images.all|length > 1 %}
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                {% for img in product.images.all %}
+                <img src="{{ img.image_url }}" alt="Thumbnail {{ forloop.counter }}" class="thumbnail-img {% if forloop.first %}active{% endif %}" data-bs-target="#productGalleryCarousel" data-bs-slide-to="{{ forloop.counter0 }}">
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
 
         <!-- Product Information -->
         <div class="col-lg-6 d-flex flex-column justify-content-center">
             <div class="mb-3">
-                {% if product.category %}
-                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold mb-2">{{ product.category.name }}</span>
-                {% endif %}
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    {% if product.category %}
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold">{{ product.category.name }}</span>
+                    {% endif %}
+                    {% if product.subcategory %}
+                    <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2 fw-semibold"><i class="fa-solid fa-layer-group me-1"></i> {{ product.subcategory.name }}</span>
+                    {% endif %}
+                </div>
                 <h1 class="display-6 fw-extrabold mb-2">{{ product.title }}</h1>
                 <div class="d-flex align-items-center gap-3 mb-3">
                     <span class="display-6 fw-bold text-primary">${{ product.price }}</span>
@@ -112,4 +151,24 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Simple Script to sync Thumbnail Active State -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var myCarousel = document.getElementById('productGalleryCarousel');
+        if (myCarousel) {
+            myCarousel.addEventListener('slide.bs.carousel', function (e) {
+                var index = e.to;
+                var thumbs = document.querySelectorAll('.thumbnail-img');
+                thumbs.forEach(function(thumb, i) {
+                    if (i === index) {
+                        thumb.classList.add('active');
+                    } else {
+                        thumb.classList.remove('active');
+                    }
+                });
+            });
+        }
+    });
+</script>
 {% endblock %}

@@ -43,7 +43,7 @@ main {
     top: -2px;
 }
 
-/* Hero Section */
+/* Hero Section & Carousel */
 .hero-banner {
     background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%);
     color: #ffffff;
@@ -55,16 +55,98 @@ main {
     overflow: hidden;
 }
 
-.hero-banner::after {
-    content: '';
+.hero-carousel {
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.25);
+    margin-bottom: 3rem;
+}
+
+.hero-slide {
+    background-size: cover;
+    background-position: center;
+    border-radius: 1.5rem;
+    padding: 4rem 3rem;
+    position: relative;
+    min-height: 380px;
+    display: flex;
+    align-items: center;
+}
+
+.hero-slide-overlay {
     position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(129, 140, 248, 0.2) 0%, rgba(255,255,255,0) 70%);
-    border-radius: 50%;
-    pointer-events: none;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(15, 23, 42, 0.92) 0%, rgba(15, 23, 42, 0.65) 55%, rgba(15, 23, 42, 0.2) 100%);
+    border-radius: 1.5rem;
+}
+
+/* Category Card Styling */
+.category-card {
+    position: relative;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    height: 210px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    display: block;
+}
+
+.category-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.category-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.category-card:hover .category-card-img {
+    transform: scale(1.08);
+}
+
+.category-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.88) 100%);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    color: #ffffff;
+}
+
+/* Horizontal Scrollable Row */
+.horizontal-scroll-row {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 1.25rem;
+    padding: 0.5rem 0.25rem 1.5rem 0.25rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.horizontal-scroll-row::-webkit-scrollbar {
+    height: 8px;
+}
+
+.horizontal-scroll-row::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.horizontal-scroll-row::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+.horizontal-scroll-item {
+    flex: 0 0 280px;
+    scroll-snap-align: start;
 }
 
 /* Product Cards */
@@ -138,6 +220,22 @@ main {
     color: #ffffff;
     border-color: var(--primary-color);
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+/* Multi-Image Gallery Thumbnails */
+.thumbnail-img {
+    width: 76px;
+    height: 76px;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.thumbnail-img:hover, .thumbnail-img.active {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
 }
 
 /* Admin Dashboard Styling */
