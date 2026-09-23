@@ -273,9 +273,9 @@
     </div>
 
     <!-- Deals Horizontal Carousel / Grid -->
-    <div class="row g-4 mt-1">
+    <div class="row g-2 g-sm-3 g-lg-4 mt-1">
       {% for product in flash_deals|slice:':4' %}
-        <div class="col-12 col-sm-6 col-lg-3 reveal">
+        <div class="col-6 col-md-4 col-lg-3 reveal">
           <div class="deal-card-wrap">
             {% include 'storefront/_product_card.html' with product=product %}
             <!-- Claimed Progress Meter -->
@@ -361,10 +361,18 @@
       </div>
     {% endif %}
 
-    <div class="row g-4">
+    <div class="row g-3 g-lg-4">
       <!-- Left Faceted Filter Sidebar (Amazon & Flipkart Style) -->
       <div class="col-lg-3">
-        <aside class="catalog-sidebar sticky-sidebar reveal">
+        <!-- Mobile Filter Toggle Bar (< 992px) -->
+        <div class="d-lg-none mb-3">
+          <button class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-between py-2 px-3 rounded-pill shadow-2xs" type="button" data-bs-toggle="collapse" data-bs-target="#catalogFilterCollapse" aria-expanded="false" aria-controls="catalogFilterCollapse">
+            <span class="fw-bold fs-xs text-uppercase letter-spacing-1"><i class="fa-solid fa-sliders me-2 text-gold"></i> Filter & Refine Products</span>
+            <i class="fa-solid fa-chevron-down fs-xs"></i>
+          </button>
+        </div>
+
+        <aside class="catalog-sidebar sticky-sidebar reveal collapse d-lg-block" id="catalogFilterCollapse">
           <!-- Sidebar Header -->
           <div class="sidebar-top-header d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
             <h3 class="fs-5 font-serif mb-0 d-flex align-items-center gap-2">
@@ -686,10 +694,10 @@
           </div>
         </div>
 
-        <!-- Product Cards Grid -->
-        <div class="row g-4">
+        <!-- Product Cards Grid (2-column on mobile, 3-column on tablet/desktop) -->
+        <div class="row g-2 g-sm-3 g-lg-4">
           {% for product in products %}
-            <div class="col-12 col-sm-6 col-md-4 reveal">
+            <div class="col-6 col-md-4 col-xl-4 reveal">
               {% include 'storefront/_product_card.html' with product=product %}
             </div>
           {% empty %}

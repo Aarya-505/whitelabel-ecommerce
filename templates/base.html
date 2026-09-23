@@ -59,8 +59,8 @@
                         </div>
                     </div>
 
-                    <!-- Centered Search Bar with Category Filter -->
-                    <div class="col">
+                    <!-- Centered Search Bar with Category Filter (Full width on mobile, centered on desktop) -->
+                    <div class="col-12 col-md order-3 order-md-2 mt-2 mt-md-0">
                         <form class="aura-search-bar" action="{% url 'storefront:home' %}" method="get">
                             <div class="search-category-select d-none d-sm-block">
                                 <select name="category" aria-label="Search Category">
@@ -79,7 +79,7 @@
                     </div>
 
                     <!-- Action Icons (Account/Sign In, Wishlist, Cart, Admin) -->
-                    <div class="col-auto">
+                    <div class="col-auto ms-auto order-2 order-md-3">
                         <div class="nav-actions d-flex align-items-center gap-1">
                             <!-- Customer Account Action (Amazon / Flipkart Style) -->
                             <div class="dropdown account-dropdown-wrap">
