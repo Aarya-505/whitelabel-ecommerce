@@ -89,9 +89,6 @@
                                         {% if request.user.is_authenticated and not request.user.is_staff %}
                                             <span class="action-sub">Hello, {{ request.user.first_name|default:request.user.username }}</span>
                                             <strong class="action-main">Account & Orders <i class="fa-solid fa-chevron-down fs-2xs ms-1"></i></strong>
-                                        {% elif request.user.is_authenticated and request.user.is_staff %}
-                                            <span class="action-sub">Hello, Users</span>
-                                            <strong class="action-main">Account <i class="fa-solid fa-chevron-down fs-2xs ms-1"></i></strong>
                                         {% else %}
                                             <span class="action-sub">Hello, Users</span>
                                             <strong class="action-main">Sign In <i class="fa-solid fa-chevron-down fs-2xs ms-1"></i></strong>
@@ -99,7 +96,7 @@
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end luxury-account-dropdown shadow-2xl p-3 border-0 rounded-4 mt-2" style="min-width: 260px;">
-                                    {% if not request.user.is_authenticated %}
+                                    {% if not request.user.is_authenticated or request.user.is_staff %}
                                         <div class="text-center pb-3 border-bottom mb-3">
                                             <a href="{% url 'storefront:user_login' %}" class="btn btn-gold w-100 rounded-pill py-2 fw-bold fs-xs shadow-sm mb-2">
                                                 Sign In to Your Account
@@ -112,10 +109,14 @@
                                             <h6 class="fs-xs fw-bold text-uppercase text-muted letter-spacing-1 mb-2">Customer Account</h6>
                                             <li><a class="dropdown-item rounded-2 py-2 fs-xs" href="{% url 'storefront:my_orders' %}"><i class="fa-solid fa-box me-2 text-gold"></i> Your Orders</a></li>
                                             <li><a class="dropdown-item rounded-2 py-2 fs-xs" href="{% url 'storefront:wishlist' %}"><i class="fa-regular fa-heart me-2 text-gold"></i> Your Wishlist</a></li>
+                                            {% if request.user.is_authenticated and request.user.is_staff %}
+                                                <li><hr class="dropdown-divider my-2"></li>
+                                                <li><a class="dropdown-item rounded-2 py-2 fs-xs text-danger" href="{% url 'storefront:user_logout' %}"><i class="fa-solid fa-right-from-bracket me-2"></i> Sign Out ({{ request.user.username }})</a></li>
+                                            {% endif %}
                                         </div>
                                     {% else %}
                                         <div class="pb-2 border-bottom mb-2">
-                                            <span class="fs-2xs text-muted text-uppercase letter-spacing-1 d-block">Signed in as</span>
+                                            <span class="fs-2xs text-muted text-uppercase letter-spacing-1 d-block">Signed in as (Customer)</span>
                                             <strong class="fs-xs text-dark">{{ request.user.email|default:request.user.username }}</strong>
                                         </div>
                                         <li><a class="dropdown-item rounded-2 py-2 fs-xs" href="{% url 'storefront:my_orders' %}"><i class="fa-solid fa-box me-2 text-gold"></i> Your Orders</a></li>
