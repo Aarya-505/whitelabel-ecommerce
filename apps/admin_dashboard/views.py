@@ -20,9 +20,9 @@ def vendor_admin_required(view_func):
             messages.info(request, "Please log in with your shop vendor/admin account to access the store management dashboard.")
             return redirect('admin_dashboard:login')
         if not (request.user.is_staff or request.user.is_superuser):
-            messages.error(
+            messages.warning(
                 request,
-                f"Access Denied: Account '{request.user.username}' is a Customer account. Only authorized shop vendors and administrators can access the Store Owner Dashboard."
+                f"You are currently signed in as customer '{request.user.username}'. If you are a vendor, please sign in with your vendor admin credentials below."
             )
             return redirect('admin_dashboard:login')
         return view_func(request, *args, **kwargs)

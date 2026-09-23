@@ -48,65 +48,56 @@
                     {% endif %}
 
                     {% if is_customer_logged_in %}
-                        <!-- Access Denied Prompt for Logged In Customers -->
-                        <div class="text-center py-3">
-                            <div class="mb-3">
-                                <span class="rounded-circle bg-danger bg-opacity-10 text-danger p-3 d-inline-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
-                                    <i class="fa-solid fa-ban fs-2"></i>
+                        <!-- Notice for Currently Logged-in Customer -->
+                        <div class="alert alert-light border rounded-3 fs-xs py-2 px-3 mb-3 text-start bg-light" role="alert">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <span class="text-muted">
+                                    <i class="fa-regular fa-circle-user me-1 text-primary"></i> Current Login: <strong>{{ request.user.username }}</strong>
                                 </span>
+                                <span class="badge bg-secondary text-uppercase fs-xxs">Customer</span>
                             </div>
-                            <h4 class="font-serif fs-4 fw-bold text-danger mb-2">No Access to This Portal</h4>
-                            <p class="text-muted fs-xs mb-4">
-                                You do not have permission to access the Store Owner Management Dashboard. Your current login (<strong>{{ request.user.username }}</strong>) is a Customer account.
-                            </p>
-                            <div class="d-flex flex-column gap-2">
-                                <a href="{% url 'storefront:home' %}" class="btn btn-dark w-100 rounded-pill py-2 text-gold fw-bold shadow-sm fs-xs">
-                                    <i class="fa-solid fa-arrow-left me-1"></i> Return to Shopping Storefront
-                                </a>
-                                <a href="{% url 'storefront:user_logout' %}?next={% url 'admin_dashboard:login' %}" class="btn btn-outline-secondary w-100 rounded-pill py-2 fs-xs fw-semibold">
-                                    <i class="fa-solid fa-right-from-bracket me-1"></i> Sign Out to Log In as Vendor
-                                </a>
+                            <div class="text-muted" style="font-size: 0.78rem;">
+                                If you are a store vendor or administrator, please enter your vendor credentials below to access the <strong>Admin Portal Dashboard</strong>.
                             </div>
-                        </div>
-                    {% else %}
-                        <!-- Standard Clean Vendor Login Form (Unauthenticated) -->
-                        {% if messages %}
-                            {% for message in messages %}
-                            <div class="alert alert-{{ message.tags|default:'danger' }} rounded-3 fs-xs py-2 mb-3" role="alert">
-                                <i class="fa-solid fa-circle-exclamation me-1"></i> {{ message }}
-                            </div>
-                            {% endfor %}
-                        {% endif %}
-
-                        <form action="{% url 'admin_dashboard:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" method="POST">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="id_username" class="form-label fs-xs fw-bold text-uppercase text-muted letter-spacing-1">Vendor Username</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-regular fa-user"></i></span>
-                                    <input type="text" name="username" id="id_username" class="form-control bg-light border-start-0" placeholder="Enter shop vendor username" required autofocus>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="id_password" class="form-label fs-xs fw-bold text-uppercase text-muted letter-spacing-1">Vendor Password</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
-                                    <input type="password" name="password" id="id_password" class="form-control bg-light border-start-0" placeholder="Enter admin password" required>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 text-gold fw-bold shadow-sm mb-3">
-                                Log In to Vendor Dashboard <i class="fa-solid fa-arrow-right ms-2"></i>
-                            </button>
-                        </form>
-
-                        <div class="pt-2 border-top text-center">
-                            <a href="{% url 'storefront:home' %}" class="text-decoration-none fs-xs text-muted hover-gold">
-                                <i class="fa-solid fa-arrow-left me-1"></i> Return to Storefront Catalog
-                            </a>
                         </div>
                     {% endif %}
+
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'danger' }} rounded-3 fs-xs py-2 mb-3" role="alert">
+                            <i class="fa-solid fa-circle-exclamation me-1"></i> {{ message }}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form action="{% url 'admin_dashboard:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label fs-xs fw-bold text-uppercase text-muted letter-spacing-1">Vendor Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-regular fa-user"></i></span>
+                                <input type="text" name="username" id="id_username" class="form-control bg-light border-start-0" placeholder="Enter shop vendor username" required autofocus>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_password" class="form-label fs-xs fw-bold text-uppercase text-muted letter-spacing-1">Vendor Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" name="password" id="id_password" class="form-control bg-light border-start-0" placeholder="Enter admin password" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 text-gold fw-bold shadow-sm mb-3">
+                            Log In to Vendor Dashboard <i class="fa-solid fa-arrow-right ms-2"></i>
+                        </button>
+                    </form>
+
+                    <div class="pt-2 border-top text-center">
+                        <a href="{% url 'storefront:home' %}" class="text-decoration-none fs-xs text-muted hover-gold">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Return to Storefront Catalog
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
