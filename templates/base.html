@@ -78,7 +78,7 @@
                         </form>
                     </div>
 
-                    <!-- Action Icons (Account/Sign In, Admin, Wishlist, Cart) -->
+                    <!-- Action Icons (Account/Sign In, Wishlist, Cart, Admin) -->
                     <div class="col-auto">
                         <div class="nav-actions d-flex align-items-center gap-1">
                             <!-- Customer Account Action (Amazon / Flipkart Style) -->
@@ -90,10 +90,10 @@
                                             <span class="action-sub">Hello, {{ request.user.first_name|default:request.user.username }}</span>
                                             <strong class="action-main">Account & Orders <i class="fa-solid fa-chevron-down fs-2xs ms-1"></i></strong>
                                         {% elif request.user.is_authenticated and request.user.is_staff %}
-                                            <span class="action-sub">Hello, Staff</span>
-                                            <strong class="action-main">{{ request.user.username }} <i class="fa-solid fa-chevron-down fs-2xs ms-1"></i></strong>
+                                            <span class="action-sub">Hello, Users</span>
+                                            <strong class="action-main">Account <i class="fa-solid fa-chevron-down fs-2xs ms-1"></i></strong>
                                         {% else %}
-                                            <span class="action-sub">Hello, User</span>
+                                            <span class="action-sub">Hello, Users</span>
                                             <strong class="action-main">Sign In <i class="fa-solid fa-chevron-down fs-2xs ms-1"></i></strong>
                                         {% endif %}
                                     </div>
@@ -115,7 +115,7 @@
                                         </div>
                                     {% else %}
                                         <div class="pb-2 border-bottom mb-2">
-                                            <span class="fs-2xs text-muted text-uppercase letter-spacing-1 d-block">Signed in as (Customer)</span>
+                                            <span class="fs-2xs text-muted text-uppercase letter-spacing-1 d-block">Signed in as</span>
                                             <strong class="fs-xs text-dark">{{ request.user.email|default:request.user.username }}</strong>
                                         </div>
                                         <li><a class="dropdown-item rounded-2 py-2 fs-xs" href="{% url 'storefront:my_orders' %}"><i class="fa-solid fa-box me-2 text-gold"></i> Your Orders</a></li>
@@ -125,16 +125,6 @@
                                     {% endif %}
                                 </ul>
                             </div>
-
-                            <!-- Dedicated Shop Vendor / Admin Button (Strictly Beside Hello Button) -->
-                            <a class="action-item admin-action-btn d-flex align-items-center gap-2" href="{% if request.user.is_authenticated and request.user.is_staff %}{% url 'admin_dashboard:overview' %}{% else %}{% url 'admin_dashboard:login' %}{% endif %}" title="Shop Vendor & Admin Management Portal (Vendor Login Only)">
-                                <i class="fa-solid fa-user-shield text-gold"></i>
-                                <div class="d-none d-md-flex flex-column text-start">
-                                    <span class="action-sub text-gold fw-bold">Shop Vendor</span>
-                                    <strong class="action-main">Admin <i class="fa-solid fa-arrow-up-right-from-square fs-2xs ms-1 text-gold"></i></strong>
-                                </div>
-                                <span class="d-md-none fw-bold text-gold">Admin</span>
-                            </a>
 
                             <!-- Wishlist Action -->
                             <a class="action-item position-relative" href="{% url 'storefront:wishlist' %}" title="Wishlist">
@@ -155,6 +145,16 @@
                                 {% if cart|length > 0 %}
                                     <span class="count-badge">{{ cart|length }}</span>
                                 {% endif %}
+                            </a>
+
+                            <!-- Dedicated Shop Vendor / Admin Button -->
+                            <a class="action-item admin-action-btn d-flex align-items-center gap-2" href="{% if request.user.is_authenticated and request.user.is_staff %}{% url 'admin_dashboard:overview' %}{% else %}{% url 'admin_dashboard:login' %}{% endif %}" title="Shop Vendor & Admin Management Portal">
+                                <i class="fa-solid fa-user-shield text-gold"></i>
+                                <div class="d-none d-md-flex flex-column text-start">
+                                    <span class="action-sub text-gold fw-bold">Shop Vendor</span>
+                                    <strong class="action-main">Admin <i class="fa-solid fa-arrow-up-right-from-square fs-2xs ms-1 text-gold"></i></strong>
+                                </div>
+                                <span class="d-md-none fw-bold text-gold">Admin</span>
                             </a>
                         </div>
                     </div>
