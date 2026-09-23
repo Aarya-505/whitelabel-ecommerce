@@ -1,0 +1,136 @@
+{% extends 'admin_dashboard/base_admin.html' %}
+
+{% block title %}Manage Catalog Products | Aura Admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h3 class="fw-extrabold mb-1">Catalog Management</h3>
+        <p class="text-muted small mb-0">Create, edit, toggle visibility, and control store inventory</p>
+    </div>
+    <a href="{% url 'admin_dashboard:product_add' %}" class="btn btn-primary-custom rounded-pill">
+        <i class="fa-solid fa-plus me-1"></i> Add New Product
+    </a>
+</div>
+
+<!-- Filters Bar -->
+<div class="card border-0 rounded-4 shadow-sm p-3 mb-4">
+    <form action="{% url 'admin_dashboard:products_list' %}" method="GET" class="row g-3 align-items-center">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                <input type="text" name="q" class="form-control bg-light border-start-0 shadow-none" placeholder="Search by title..." value="{{ query }}">
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <select name="category" class="form-select bg-light shadow-none" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if selected_category == cat.id|slugify %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <select name="status" class="form-select bg-light shadow-none" onchange="this.form.submit()">
+                <option value="">All Inventory Statuses</option>
+                <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Visible (Active)</option>
+                <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Hidden (Inactive)</option>
+                <option value="low_stock" {% if selected_status == 'low_stock' %}selected{% endif %}>Low Stock (1-5 units)</option>
+                <option value="out_of_stock" {% if selected_status == 'out_of_stock' %}selected{% endif %}>Out of Stock (0 units)</option>
+            </select>
+        </div>
+
+        <div class="col-md-2 text-end">
+            <button type="submit" class="btn btn-dark w-100 rounded-pill">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- Products Table -->
+<div class="card border-0 rounded-4 shadow-sm overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+                <tr>
+                    <th scope="col" class="ps-4">Item & Code</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Price</th>
+                    <th scope="col" class="text-center">Units Sold</th>
+                    <th scope="col" class="text-center">Stock Left</th>
+                    <th scope="col">Storefront Status</th>
+                    <th scope="col">Created Date</th>
+                    <th scope="col" class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td class="ps-4 py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="{{ product.image_url }}" alt="{{ product.title }}" class="rounded-3" style="width: 48px; height: 48px; object-fit: cover;">
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">{{ product.title }}</h6>
+                                <small class="text-muted">Slug: {{ product.slug }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge bg-light text-dark border">{{ product.category.name|default:"Uncategorized" }}</span></td>
+                    <td class="fw-bold text-dark">₹{{ product.price }}</td>
+                    <td class="text-center">
+                        <span class="badge bg-success-subtle text-success fw-bold px-2 py-1 rounded-pill">
+                            {{ product.units_sold|default:0 }} sold
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        {% if product.stock_quantity == 0 %}
+                        <span class="badge bg-danger text-white rounded-pill px-3 py-1">0 (Out of stock)</span>
+                        {% elif product.is_low_stock %}
+                        <span class="badge bg-warning-subtle text-dark border border-warning rounded-pill px-3 py-1">{{ product.stock_quantity }} (Low)</span>
+                        {% else %}
+                        <span class="badge bg-light text-dark border rounded-pill px-3 py-1">{{ product.stock_quantity }} in stock</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form action="{% url 'admin_dashboard:product_toggle_visibility' pk=product.pk %}" method="POST" class="d-inline">
+                            {% csrf_token %}
+                            {% if product.is_active %}
+                            <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold" title="Click to hide on storefront">
+                                <i class="fa-solid fa-eye me-1"></i> Visible
+                            </button>
+                            {% else %}
+                            <button type="submit" class="btn btn-sm btn-secondary rounded-pill px-3 fw-semibold" title="Click to publish on storefront">
+                                <i class="fa-solid fa-eye-slash me-1"></i> Hidden
+                            </button>
+                            {% endif %}
+                        </form>
+                    </td>
+                    <td class="small text-muted">{{ product.created_at|date:"M d, Y" }}</td>
+                    <td class="text-end pe-4">
+                        <div class="btn-group">
+                            <a href="{% url 'storefront:product_detail' slug=product.slug %}" target="_blank" class="btn btn-sm btn-outline-secondary" title="View on storefront">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </a>
+                            <a href="{% url 'admin_dashboard:product_edit' pk=product.pk %}" class="btn btn-sm btn-outline-primary" title="Edit product">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <a href="{% url 'admin_dashboard:product_delete' pk=product.pk %}" class="btn btn-sm btn-outline-danger" title="Delete product">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-5 text-muted">
+                        <i class="fa-solid fa-box-open fs-2 d-block mb-2"></i>
+                        No products match your criteria. <a href="{% url 'admin_dashboard:product_add' %}" class="text-primary">Add a new product</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

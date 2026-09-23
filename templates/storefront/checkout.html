@@ -1,0 +1,821 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout — Select Delivery Address & Payment | AURA{% endblock %}
+
+{% block content %}
+<section class="checkout-section py-4 py-lg-5 bg-surface-subtle min-vh-100">
+  <div class="container checkout-container">
+    
+    <!-- Top Header Breadcrumb & Security Strip -->
+    <div class="checkout-header-strip mb-4 pb-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <a href="{% url 'cart:cart_detail' %}" class="text-muted hover-gold text-decoration-none fs-xs">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Shopping Bag
+          </a>
+          <span class="text-muted fs-xs">•</span>
+          <span class="badge bg-gold-light text-gold fs-2xs px-2 py-1 rounded-pill">
+            <i class="fa-solid fa-lock me-1"></i> 256-Bit SSL Encrypted
+          </span>
+        </div>
+        <h1 class="font-serif fs-2 fw-bold text-dark mb-0">Secure Checkout</h1>
+      </div>
+      
+      <!-- Stepper Progress Indicator (Amazon/Flipkart Style) -->
+      <div class="checkout-stepper-wrap d-flex align-items-center gap-2 fs-xs">
+        <span class="step-chip active fw-bold text-dark"><span class="step-num bg-gold text-dark me-1">1</span> Delivery Address</span>
+        <i class="fa-solid fa-chevron-right text-muted fs-2xs"></i>
+        <span class="step-chip active fw-bold text-dark"><span class="step-num bg-gold text-dark me-1">2</span> Gift & Payment</span>
+        <i class="fa-solid fa-chevron-right text-muted fs-2xs"></i>
+        <span class="step-chip text-muted"><span class="step-num bg-secondary-subtle text-muted me-1">3</span> Order Review</span>
+      </div>
+    </div>
+
+    <!-- Main Form Grid -->
+    <form method="post" id="auraCheckoutForm" class="row g-4 g-xl-5">
+      {% csrf_token %}
+      
+      <!-- Left Column: Address, Gifts, and Payment -->
+      <div class="col-lg-7 col-xl-8">
+        
+        <!-- ========================================== -->
+        <!-- STEP 1: DELIVERY ADDRESS & LOCATION SYNC -->
+        <!-- ========================================== -->
+        <div class="checkout-block card border-0 rounded-4 shadow-sm mb-4 overflow-hidden">
+          <div class="card-header bg-white border-bottom p-3 p-md-4 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <span class="checkout-step-badge bg-gold text-dark fw-bold rounded-circle d-grid place-items-center" style="width: 28px; height: 28px;">1</span>
+              <h2 class="fs-5 fw-bold font-serif mb-0 text-dark">Select Delivery Address</h2>
+            </div>
+            <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3 fs-xs" data-bs-toggle="modal" data-bs-target="#deliveryLocationModal">
+              <i class="fa-solid fa-location-dot text-gold me-1"></i> Change Header Location
+            </button>
+          </div>
+
+          <div class="card-body p-3 p-md-4">
+            
+            <!-- Signed In Account Verification Strip -->
+            {% if request.user.is_authenticated %}
+              <div class="user-account-chip p-2 px-3 bg-light rounded-3 border d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge bg-dark text-gold rounded-circle d-grid place-items-center" style="width: 26px; height: 26px;">
+                    <i class="fa-solid fa-user-check fs-xs"></i>
+                  </span>
+                  <span class="fs-xs text-dark">
+                    Ordering as: <strong>{{ request.user.get_full_name|default:request.user.username }}</strong> <span class="text-muted">({{ request.user.email }})</span>
+                  </span>
+                </div>
+                <span class="badge bg-success-subtle text-success fs-2xs px-2 py-1 rounded-pill">
+                  <i class="fa-solid fa-circle-check me-1"></i> Orders saved to your account
+                </span>
+              </div>
+            {% endif %}
+
+            <!-- Active Address Preview Card (Pre-filled from Header / Storage) -->
+            <div id="activeAddressCard" class="delivery-address-selection-card border-2 border-gold rounded-3 p-3 p-md-4 mb-3 bg-light position-relative">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="d-flex align-items-center gap-2">
+                  <input type="radio" name="address_selection_mode" id="useActiveAddressRadio" checked class="form-check-input text-gold mt-0" style="cursor: pointer;">
+                  <strong class="fs-sm text-dark" id="displayRecipientName">
+                    {% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% else %}Valued Client{% endif %}
+                  </strong>
+                  <span class="badge bg-dark text-gold fs-2xs px-2" id="displayAddressType">HOME</span>
+                  <span class="badge bg-success-subtle text-success fs-2xs px-2"><i class="fa-solid fa-circle-check me-1"></i> Synced with Header</span>
+                </div>
+                <button type="button" class="btn btn-link text-gold p-0 fs-xs fw-bold text-decoration-none" onclick="toggleAddressEditMode()">
+                  <i class="fa-solid fa-pen-to-square me-1"></i> Edit Address
+                </button>
+              </div>
+
+              <div class="ps-4">
+                <p class="fs-xs text-secondary mb-1" id="displayStreetAddress">
+                  Loading delivery destination...
+                </p>
+                <p class="fs-xs text-dark fw-semibold mb-2">
+                  <span id="displayCityPostal">Detecting region...</span> • Phone: <span id="displayPhone">{% if request.user.is_authenticated %}Contact on file{% else %}To be provided{% endif %}</span>
+                </p>
+                <div class="d-flex align-items-center gap-3 pt-2 border-top">
+                  <span class="fs-2xs text-success fw-bold">
+                    <i class="fa-solid fa-bolt text-gold me-1"></i> Guaranteed Delivery: Tomorrow by 6:00 PM
+                  </span>
+                  <span class="fs-2xs text-muted">|</span>
+                  <span class="fs-2xs text-muted">
+                    <i class="fa-solid fa-truck-fast me-1"></i> Free Express Courier
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- "Deliver Somewhere Else / Add New Address" Toggle Button -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+              <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fs-xs" onclick="toggleAddressForm()">
+                <i class="fa-solid fa-plus me-1 text-gold"></i> Deliver to a Different Address / Add New Address
+              </button>
+              <span class="fs-2xs text-muted">
+                <i class="fa-solid fa-shield-check text-gold me-1"></i> Address automatically syncs across AURA store
+              </span>
+            </div>
+
+            <!-- Collapsible / Editable Full Address Entry Form -->
+            <div id="customAddressFormSection" class="p-3 p-md-4 rounded-3 border bg-white mt-3" style="display: none;">
+              <h6 class="fs-xs fw-bold text-uppercase letter-spacing-1 text-gold mb-3">
+                <i class="fa-solid fa-map-location-dot me-1"></i> Enter Specific Delivery Address Details
+              </h6>
+              
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label luxury-label mb-1">Full Recipient Name</label>
+                  <input type="text" id="input_customer_name" name="customer_name" 
+                         value="{% if request.POST.customer_name %}{{ request.POST.customer_name }}{% elif request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}" 
+                         class="form-control form-control-sm luxury-input" placeholder="e.g. Rahul Sharma" oninput="syncAddressToPreview()">
+                </div>
+                
+                <div class="col-md-6">
+                  <label class="form-label luxury-label mb-1">Mobile Number (10 Digits)</label>
+                  <input type="tel" id="input_customer_phone" name="customer_phone" 
+                         value="{{ request.POST.customer_phone|default:'' }}" 
+                         class="form-control form-control-sm luxury-input" placeholder="e.g. 9876543210" oninput="syncAddressToPreview()">
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label luxury-label mb-1">Email Address (For Order Tracking & Invoices)</label>
+                  <input type="email" id="input_customer_email" name="customer_email" 
+                         value="{% if request.POST.customer_email %}{{ request.POST.customer_email }}{% elif request.user.is_authenticated %}{{ request.user.email }}{% endif %}" 
+                         class="form-control form-control-sm luxury-input" placeholder="e.g. rahul.sharma@example.com">
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label luxury-label mb-1">Flat, House No., Building, Apartment, Street</label>
+                  <textarea id="input_shipping_address" name="shipping_address" rows="2" 
+                            class="form-control form-control-sm luxury-input" placeholder="e.g. Flat 402, Royale Palms, 18th Main Road, Indiranagar" oninput="syncAddressToPreview()">{{ request.POST.shipping_address|default:'' }}</textarea>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label luxury-label mb-1">City / Town</label>
+                  <input type="text" id="input_city" name="city" 
+                         value="{{ request.POST.city|default:'' }}" 
+                         class="form-control form-control-sm luxury-input" placeholder="e.g. Bengaluru" oninput="syncAddressToPreview()">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label luxury-label mb-1">PIN / Postal Code</label>
+                  <input type="text" id="input_postal_code" name="postal_code" 
+                         value="{{ request.POST.postal_code|default:'' }}" 
+                         class="form-control form-control-sm luxury-input" placeholder="e.g. 560001" oninput="syncAddressToPreview()">
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label luxury-label mb-1 d-block">Address Type</label>
+                  <div class="d-flex gap-3">
+                    <label class="form-check-label fs-xs d-flex align-items-center gap-1 cursor-pointer">
+                      <input type="radio" name="address_type" value="Home" checked class="form-check-input mt-0" onchange="syncAddressToPreview()"> Home (All-day Delivery)
+                    </label>
+                    <label class="form-check-label fs-xs d-flex align-items-center gap-1 cursor-pointer">
+                      <input type="radio" name="address_type" value="Work" class="form-check-input mt-0" onchange="syncAddressToPreview()"> Work (10 AM - 6 PM)
+                    </label>
+                    <label class="form-check-label fs-xs d-flex align-items-center gap-1 cursor-pointer">
+                      <input type="radio" name="address_type" value="Other" class="form-check-input mt-0" onchange="syncAddressToPreview()"> Other
+                    </label>
+                  </div>
+                </div>
+
+                <div class="col-12 pt-2 d-flex justify-content-end gap-2">
+                  <button type="button" class="btn btn-gold btn-sm rounded-pill px-4 fw-bold" onclick="saveAndApplyAddress()">
+                    <i class="fa-solid fa-circle-check me-1"></i> Use & Save This Address
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- STEP 2: SEND AS A GIFT (Amazon/Flipkart)   -->
+        <!-- ========================================== -->
+        <div class="checkout-block card border-0 rounded-4 shadow-sm mb-4 overflow-hidden">
+          <div class="card-header bg-white border-bottom p-3 p-md-4 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <span class="checkout-step-badge bg-gold text-dark fw-bold rounded-circle d-grid place-items-center" style="width: 28px; height: 28px;">2</span>
+              <h2 class="fs-5 fw-bold font-serif mb-0 text-dark">Gift Options & Special Packaging</h2>
+            </div>
+            <span class="badge bg-gold-light text-gold fs-2xs px-2 py-1 rounded-pill">
+              <i class="fa-solid fa-gift me-1"></i> Optional
+            </span>
+          </div>
+
+          <div class="card-body p-3 p-md-4">
+            <!-- Gift Checkbox Trigger -->
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" role="switch" id="isGiftCheckbox" name="is_gift" value="1" onchange="toggleGiftOptions(this.checked)">
+              <label class="form-check-label fs-sm fw-bold text-dark cursor-pointer" for="isGiftCheckbox">
+                🎁 This order contains a gift / Sending to someone special
+              </label>
+              <div class="fs-xs text-muted">
+                Add a personalized greeting message, luxury satin ribbon wrap, and conceal pricing on invoices.
+              </div>
+            </div>
+
+            <!-- Expandable Gift Details Section -->
+            <div id="giftDetailsContainer" class="p-3 p-md-4 rounded-3 border bg-light mt-3" style="display: none;">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label luxury-label mb-1">Gift Recipient's Name</label>
+                  <input type="text" name="gift_recipient_name" id="giftRecipientName" class="form-control form-control-sm luxury-input" placeholder="e.g. Ananya Roy">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label luxury-label mb-1">Recipient's Phone (For Courier Call)</label>
+                  <input type="tel" name="gift_recipient_phone" id="giftRecipientPhone" class="form-control form-control-sm luxury-input" placeholder="e.g. 9812345678">
+                </div>
+                <div class="col-12">
+                  <label class="form-label luxury-label mb-1 d-flex justify-content-between">
+                    <span>Personalized Greeting Card Message</span>
+                    <span class="text-muted fs-2xs" id="giftCharCounter">0 / 250</span>
+                  </label>
+                  <textarea name="gift_message" id="giftMessageInput" rows="3" maxlength="250" class="form-control form-control-sm luxury-input" placeholder="Write a warm note for the recipient (e.g. Wishing you happiness, joy, and grand celebrations on your special day!)..." oninput="updateGiftCounter(this)"></textarea>
+                  <span class="fs-2xs text-muted d-block mt-1">
+                    <i class="fa-solid fa-pen-nib text-gold me-1"></i> Printed on gold-embossed textured AURA stationery.
+                  </span>
+                </div>
+
+                <div class="col-12 pt-2 border-top">
+                  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                    <label class="form-check-label fs-xs d-flex align-items-center gap-2 cursor-pointer">
+                      <input type="checkbox" name="gift_wrap" id="giftWrapCheckbox" value="1" class="form-check-input mt-0" onchange="toggleGiftWrapPrice(this.checked)">
+                      <span><strong class="text-dark">Signature Luxury Gift Box & Satin Ribbon</strong> (+ ₹99.00)</span>
+                    </label>
+                    <span class="badge bg-gold-light text-gold fs-2xs px-2 py-1 rounded-pill">Celebration Ready</span>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-check-label fs-xs d-flex align-items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="hide_invoice_price" value="1" checked class="form-check-input mt-0">
+                    <span class="text-muted">Do not print product prices on delivery invoice (Include Gift Receipt only)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- STEP 3: PAYMENT METHOD SELECTION           -->
+        <!-- ========================================== -->
+        <div class="checkout-block card border-0 rounded-4 shadow-sm mb-4 overflow-hidden">
+          <div class="card-header bg-white border-bottom p-3 p-md-4 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <span class="checkout-step-badge bg-gold text-dark fw-bold rounded-circle d-grid place-items-center" style="width: 28px; height: 28px;">3</span>
+              <h2 class="fs-5 fw-bold font-serif mb-0 text-dark">Choose Payment Mode</h2>
+            </div>
+            <span class="badge bg-success-subtle text-success fs-2xs px-2 py-1 rounded-pill">
+              <i class="fa-solid fa-shield-halved me-1"></i> 100% Safe Sandbox
+            </span>
+          </div>
+
+          <div class="card-body p-3 p-md-4">
+            
+            <div class="payment-methods-stack d-flex flex-column gap-3">
+              
+              <!-- Option A: UPI & QR -->
+              <label class="payment-mode-card border rounded-3 p-3 d-flex align-items-start gap-3 cursor-pointer active">
+                <input type="radio" name="payment_method" value="UPI (GooglePay / PhonePe / Paytm)" checked class="form-check-input mt-1 text-gold" onchange="selectPaymentMode(this)">
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong class="fs-sm text-dark">UPI / Instant QR Code</strong>
+                    <div class="d-flex align-items-center gap-2 fs-xs text-muted">
+                      <span class="badge bg-light text-dark border px-2 py-1">Google Pay</span>
+                      <span class="badge bg-light text-dark border px-2 py-1">PhonePe</span>
+                      <span class="badge bg-light text-dark border px-2 py-1">Paytm</span>
+                    </div>
+                  </div>
+                  <p class="fs-xs text-muted mb-2">Pay securely using any UPI App or QR scanner without convenience fee.</p>
+                  
+                  <div class="upi-mock-box p-3 bg-light rounded border mt-2">
+                    <div class="row align-items-center g-3">
+                      <div class="col-sm-8">
+                        <label class="form-label luxury-label mb-1">Enter your UPI ID</label>
+                        <div class="input-group input-group-sm">
+                          <input type="text" class="form-control luxury-input" placeholder="e.g. yourname@oksbi / 9876543210@paytm" value="demo.customer@upi">
+                          <button class="btn btn-outline-dark btn-sm px-3" type="button" onclick="alert('UPI ID verified successfully!')">Verify</button>
+                        </div>
+                      </div>
+                      <div class="col-sm-4 text-center">
+                        <div class="qr-mock d-inline-block p-1 bg-white border rounded">
+                          <i class="fa-solid fa-qrcode fs-1 text-dark"></i>
+                        </div>
+                        <span class="d-block fs-2xs text-muted mt-1">Instant Scan</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </label>
+
+              <!-- Option B: Cards -->
+              <label class="payment-mode-card border rounded-3 p-3 d-flex align-items-start gap-3 cursor-pointer">
+                <input type="radio" name="payment_method" value="Credit or Debit Card" class="form-check-input mt-1 text-gold" onchange="selectPaymentMode(this)">
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong class="fs-sm text-dark">Credit / Debit Card</strong>
+                    <div class="d-flex gap-2 fs-5 text-muted">
+                      <i class="fa-brands fa-cc-visa text-primary"></i>
+                      <i class="fa-brands fa-cc-mastercard text-danger"></i>
+                      <i class="fa-brands fa-cc-amex text-info"></i>
+                    </div>
+                  </div>
+                  <p class="fs-xs text-muted mb-0">All domestic & international cards accepted with zero surcharge.</p>
+                </div>
+              </label>
+
+              <!-- Option C: Net Banking -->
+              <label class="payment-mode-card border rounded-3 p-3 d-flex align-items-start gap-3 cursor-pointer">
+                <input type="radio" name="payment_method" value="Net Banking" class="form-check-input mt-1 text-gold" onchange="selectPaymentMode(this)">
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong class="fs-sm text-dark">Net Banking</strong>
+                    <i class="fa-solid fa-building-columns text-gold fs-5"></i>
+                  </div>
+                  <p class="fs-xs text-muted mb-0">HDFC, ICICI, SBI, Axis, Kotak, and 50+ major Indian banks supported.</p>
+                </div>
+              </label>
+
+              <!-- Option D: Cash on Delivery -->
+              <label class="payment-mode-card border rounded-3 p-3 d-flex align-items-start gap-3 cursor-pointer">
+                <input type="radio" name="payment_method" value="Cash on Delivery (Courier Handover)" class="form-check-input mt-1 text-gold" onchange="selectPaymentMode(this)">
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong class="fs-sm text-dark">Cash on Delivery (Courier Handover)</strong>
+                    <i class="fa-solid fa-hand-holding-dollar text-success fs-5"></i>
+                  </div>
+                  <p class="fs-xs text-muted mb-0">Pay in cash or digital UPI upon white-glove doorstep delivery.</p>
+                </div>
+              </label>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Sticky Order Summary & Coupon Engine -->
+      <div class="col-lg-5 col-xl-4">
+        <aside class="checkout-sidebar-sticky sticky-top" style="top: 100px; z-index: 10;">
+          
+          <!-- Summary Card -->
+          <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-3">
+            <h3 class="fs-5 fw-bold font-serif mb-3 text-dark d-flex justify-content-between align-items-center">
+              <span>Order Summary</span>
+              <span class="badge bg-dark text-gold fs-xs px-2 py-1 rounded-pill">{{ cart|length }} items</span>
+            </h3>
+
+            <!-- Mini Cart Items Preview -->
+            <div class="checkout-items-preview-box max-h-250 overflow-y-auto mb-3 pe-1">
+              {% for item in cart %}
+                <div class="d-flex align-items-center justify-content-between gap-3 py-2 border-bottom">
+                  <img src="{{ item.product.image_url }}" alt="{{ item.product.title }}" class="rounded-2 object-fit-cover shadow-2xs" style="width: 46px; height: 46px;">
+                  <div class="flex-grow-1">
+                    <strong class="fs-xs text-dark text-truncate d-block" style="max-width: 170px;">{{ item.product.title }}</strong>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="fs-2xs text-muted">Qty: {{ item.quantity }} × ₹{{ item.price }}</span>
+                      {% if item.size %}
+                        <span class="badge bg-light text-dark border fs-3xs px-1 py-0">Size: {{ item.size }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <strong class="fs-xs text-dark">₹{{ item.total_price }}</strong>
+                </div>
+              {% endfor %}
+            </div>
+
+            <!-- ========================================== -->
+            <!-- COUPON CODE APPLICATION BOX (Amazon Style) -->
+            <!-- ========================================== -->
+            <div class="coupon-box p-3 bg-light rounded-3 border mb-3">
+              <label class="form-label luxury-label mb-1 d-flex justify-content-between">
+                <span><i class="fa-solid fa-tags text-gold me-1"></i> Apply Promo Coupon</span>
+                {% if applied_coupon %}
+                  <span class="badge bg-success-subtle text-success fs-2xs"><i class="fa-solid fa-check me-1"></i> Active</span>
+                {% endif %}
+              </label>
+              
+              <div class="input-group input-group-sm mb-2">
+                <input type="text" id="couponCodeInput" name="coupon_code" class="form-control luxury-input text-uppercase fw-bold" placeholder="e.g. FESTIVE20" value="{{ applied_coupon|default:'' }}">
+                <button type="button" class="btn btn-gold btn-sm px-3 fw-bold" onclick="applyCouponCode()">Apply</button>
+              </div>
+
+              <!-- Available Coupons Quick-Apply Pills -->
+              <div class="available-coupons-pills d-flex flex-wrap gap-1 mt-2">
+                <button type="button" class="badge bg-white text-dark border p-1 px-2 fs-2xs rounded-pill hover-gold cursor-pointer" onclick="quickSelectCoupon('FESTIVE20')">
+                  <i class="fa-solid fa-tag text-gold me-1"></i> FESTIVE20 (20% OFF)
+                </button>
+                <button type="button" class="badge bg-white text-dark border p-1 px-2 fs-2xs rounded-pill hover-gold cursor-pointer" onclick="quickSelectCoupon('AURA15')">
+                  <i class="fa-solid fa-tag text-gold me-1"></i> AURA15 (15% OFF)
+                </button>
+                <button type="button" class="badge bg-white text-dark border p-1 px-2 fs-2xs rounded-pill hover-gold cursor-pointer" onclick="quickSelectCoupon('FIRST500')">
+                  <i class="fa-solid fa-tag text-gold me-1"></i> FIRST500 (₹500 OFF)
+                </button>
+              </div>
+
+              <div id="couponStatusNotice" class="fs-2xs mt-2 {% if applied_coupon %}text-success fw-bold{% else %}text-muted{% endif %}">
+                {% if applied_coupon %}
+                  <i class="fa-solid fa-circle-check me-1 text-success"></i> Coupon <strong>{{ applied_coupon }}</strong> applied! (₹{{ discount_amount }} saved)
+                  <a href="javascript:void(0)" onclick="removeCouponCode()" class="text-danger ms-2 text-decoration-none">[Remove]</a>
+                {% else %}
+                  Apply coupon to get instant festive savings on checkout.
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Price Breakdown Calculation -->
+            <div class="price-breakdown-table mb-3">
+              <div class="d-flex justify-content-between fs-xs mb-2">
+                <span class="text-muted">Merchandise Subtotal:</span>
+                <strong class="text-dark" id="displaySubtotal">₹{{ cart.get_total_price }}</strong>
+              </div>
+
+              <div class="d-flex justify-content-between fs-xs mb-2 text-success" id="discountRow" style="{% if not discount_amount or discount_amount == 0 %}display: none;{% endif %}">
+                <span><i class="fa-solid fa-tag me-1"></i> Coupon Savings:</span>
+                <strong id="displayDiscount">-₹{{ discount_amount|default:'0.00' }}</strong>
+              </div>
+
+              <div class="d-flex justify-content-between fs-xs mb-2" id="giftWrapRow" style="display: none;">
+                <span class="text-muted">Signature Luxury Gift Wrap:</span>
+                <strong class="text-dark" id="displayGiftWrap">+₹99.00</strong>
+              </div>
+
+              <div class="d-flex justify-content-between fs-xs mb-2">
+                <span class="text-muted">Delivery & Handling:</span>
+                <span class="text-success fw-bold">FREE</span>
+              </div>
+
+              <div class="d-flex justify-content-between fs-xs mb-2">
+                <span class="text-muted">Estimated Taxes & GST:</span>
+                <span class="text-muted">Included</span>
+              </div>
+
+              <hr class="my-3">
+
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div>
+                  <strong class="fs-4 fw-bold font-serif d-block text-dark">Total Amount</strong>
+                  <span class="fs-2xs text-muted">Inclusive of all taxes</span>
+                </div>
+                <strong class="fs-2 text-gold fw-bold" id="displayGrandTotal">₹{{ total_payable|default:cart.get_total_price }}</strong>
+              </div>
+            </div>
+
+            <!-- Main CTA Submit Button -->
+            <button type="submit" id="placeOrderBtn" class="btn btn-gold w-100 py-3 rounded-pill fw-bold fs-sm shadow-sm d-flex justify-content-center align-items-center gap-2 mb-3">
+              <i class="fa-solid fa-lock me-1" id="placeOrderLockIcon"></i>
+              <span id="placeOrderBtnText">Confirm & Place Order</span>
+              <i class="fa-solid fa-arrow-right ms-1" id="placeOrderBtnArrow"></i>
+            </button>
+
+            <!-- Trust Badges -->
+            <div class="pt-3 border-top d-flex justify-content-around text-center fs-2xs text-muted">
+              <div>
+                <i class="fa-solid fa-shield-halved fs-6 text-gold d-block mb-1"></i>
+                <span>100% Genuine</span>
+              </div>
+              <div>
+                <i class="fa-solid fa-rotate-left fs-6 text-gold d-block mb-1"></i>
+                <span>7 Days Return</span>
+              </div>
+              <div>
+                <i class="fa-solid fa-truck-fast fs-6 text-gold d-block mb-1"></i>
+                <span>Free Express</span>
+              </div>
+            </div>
+
+          </div>
+        </aside>
+      </div>
+
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Base cart subtotal in float
+const CART_SUBTOTAL = parseFloat("{{ cart.get_total_price }}") || 0;
+let currentDiscount = parseFloat("{{ discount_amount|default:0 }}") || 0;
+let currentGiftWrap = 0;
+
+// Hydrate and sync addresses with header and localStorage
+document.addEventListener('DOMContentLoaded', () => {
+    hydrateDeliveryAddress();
+    
+    // Listen to header modal location updates in real-time
+    window.addEventListener('auraLocationChanged', (e) => {
+        hydrateDeliveryAddress();
+    });
+});
+
+function hydrateDeliveryAddress() {
+    const savedLoc = localStorage.getItem(LOCATION_STORAGE_KEY) || '';
+    const savedAddressJson = localStorage.getItem(ADDRESS_STORAGE_KEY);
+    
+    let parsedAddress = null;
+    if (savedAddressJson) {
+        try {
+            parsedAddress = JSON.parse(savedAddressJson);
+        } catch (e) {
+            console.debug(e);
+        }
+    }
+
+    const inputName = document.getElementById('input_customer_name');
+    const inputPhone = document.getElementById('input_customer_phone');
+    const inputEmail = document.getElementById('input_customer_email');
+    const inputAddress = document.getElementById('input_shipping_address');
+    const inputCity = document.getElementById('input_city');
+    const inputPostal = document.getElementById('input_postal_code');
+
+    // Populate inputs if available
+    if (parsedAddress) {
+        if (parsedAddress.customer_name && inputName && !inputName.value) inputName.value = parsedAddress.customer_name;
+        if (parsedAddress.customer_phone && inputPhone && !inputPhone.value) inputPhone.value = parsedAddress.customer_phone;
+        if (parsedAddress.shipping_address && inputAddress && !inputAddress.value) inputAddress.value = parsedAddress.shipping_address;
+        if (parsedAddress.city && inputCity && !inputCity.value) inputCity.value = parsedAddress.city;
+        if (parsedAddress.postal_code && inputPostal && !inputPostal.value) inputPostal.value = parsedAddress.postal_code;
+    } else if (savedLoc) {
+        if (inputAddress && !inputAddress.value) inputAddress.value = savedLoc;
+        const parts = savedLoc.split(',').map(s => s.trim());
+        if (inputCity && !inputCity.value && parts.length > 0) inputCity.value = parts[0];
+        const postalMatch = savedLoc.match(/\b\d{5,6}\b/) || savedLoc.match(/\b[A-Z0-9]{3,4}\s?[A-Z0-9]{3}\b/);
+        if (inputPostal && !inputPostal.value && postalMatch) inputPostal.value = postalMatch[0];
+    }
+
+    // Update active card display
+    syncAddressToPreview();
+}
+
+function syncAddressToPreview() {
+    const nameVal = document.getElementById('input_customer_name')?.value.trim() || 
+                    "{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% else %}Valued Client{% endif %}";
+    const phoneVal = document.getElementById('input_customer_phone')?.value.trim() || "To be provided";
+    const addressVal = document.getElementById('input_shipping_address')?.value.trim() || 
+                       localStorage.getItem(LOCATION_STORAGE_KEY) || "Click 'Edit Address' to enter street details";
+    const cityVal = document.getElementById('input_city')?.value.trim() || "";
+    const postalVal = document.getElementById('input_postal_code')?.value.trim() || "";
+    
+    const typeChecked = document.querySelector('input[name="address_type"]:checked')?.value || 'HOME';
+
+    const dispName = document.getElementById('displayRecipientName');
+    const dispPhone = document.getElementById('displayPhone');
+    const dispAddr = document.getElementById('displayStreetAddress');
+    const dispCityPostal = document.getElementById('displayCityPostal');
+    const dispType = document.getElementById('displayAddressType');
+
+    if (dispName) dispName.textContent = nameVal;
+    if (dispPhone) dispPhone.textContent = phoneVal;
+    if (dispAddr) dispAddr.textContent = addressVal;
+    if (dispCityPostal) dispCityPostal.textContent = [cityVal, postalVal].filter(Boolean).join(' - ') || 'Delivery Region Synced';
+    if (dispType) dispType.textContent = typeChecked.toUpperCase();
+}
+
+function toggleAddressForm() {
+    const section = document.getElementById('customAddressFormSection');
+    if (section) {
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            section.style.display = 'none';
+        }
+    }
+}
+
+function toggleAddressEditMode() {
+    const section = document.getElementById('customAddressFormSection');
+    if (section) {
+        section.style.display = 'block';
+        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        document.getElementById('input_shipping_address')?.focus();
+    }
+}
+
+function saveAndApplyAddress() {
+    const nameVal = document.getElementById('input_customer_name')?.value.trim();
+    const phoneVal = document.getElementById('input_customer_phone')?.value.trim();
+    const emailVal = document.getElementById('input_customer_email')?.value.trim();
+    const addressVal = document.getElementById('input_shipping_address')?.value.trim();
+    const cityVal = document.getElementById('input_city')?.value.trim();
+    const postalVal = document.getElementById('input_postal_code')?.value.trim();
+    const typeVal = document.querySelector('input[name="address_type"]:checked')?.value || 'Home';
+
+    if (!addressVal || !cityVal || !postalVal) {
+        alert('Please fill in Flat/Street Address, City, and PIN Code.');
+        return;
+    }
+
+    const locString = `${cityVal}, ${postalVal}`;
+    const addressObj = {
+        customer_name: nameVal,
+        customer_phone: phoneVal,
+        customer_email: emailVal,
+        shipping_address: addressVal,
+        city: cityVal,
+        postal_code: postalVal,
+        address_type: typeVal
+    };
+
+    // Update global location and local storage, syncing header navbar
+    setDeliveryLocation(locString, true, addressObj);
+    syncAddressToPreview();
+
+    // Hide form
+    const section = document.getElementById('customAddressFormSection');
+    if (section) section.style.display = 'none';
+}
+
+// Gift Options Toggle
+function toggleGiftOptions(isChecked) {
+    const container = document.getElementById('giftDetailsContainer');
+    if (container) {
+        container.style.display = isChecked ? 'block' : 'none';
+    }
+    if (!isChecked) {
+        const wrapBox = document.getElementById('giftWrapCheckbox');
+        if (wrapBox && wrapBox.checked) {
+            wrapBox.checked = false;
+            toggleGiftWrapPrice(false);
+        }
+    }
+}
+
+function updateGiftCounter(el) {
+    const counter = document.getElementById('giftCharCounter');
+    if (counter) {
+        counter.textContent = `${el.value.length} / 250`;
+    }
+}
+
+function toggleGiftWrapPrice(isChecked) {
+    currentGiftWrap = isChecked ? 99.00 : 0.00;
+    const giftRow = document.getElementById('giftWrapRow');
+    if (giftRow) {
+        giftRow.style.display = isChecked ? 'flex' : 'none';
+    }
+    recalculateTotal();
+}
+
+// Coupon Logic
+const CLIENT_COUPONS = {
+    'FESTIVE20': { type: 'percent', val: 20, min: 0 },
+    'AURA15': { type: 'percent', val: 15, min: 0 },
+    'FIRST500': { type: 'flat', val: 500, min: 2000 },
+    'LUXURY1000': { type: 'flat', val: 1000, min: 5000 },
+    'FREESHIP': { type: 'flat', val: 0, min: 0 }
+};
+
+function quickSelectCoupon(code) {
+    const input = document.getElementById('couponCodeInput');
+    if (input) {
+        input.value = code;
+        applyCouponCode();
+    }
+}
+
+function applyCouponCode() {
+    const input = document.getElementById('couponCodeInput');
+    const notice = document.getElementById('couponStatusNotice');
+    const code = (input?.value || '').trim().toUpperCase();
+
+    if (!code) {
+        if (notice) {
+            notice.className = 'fs-2xs mt-2 text-danger';
+            notice.textContent = 'Please enter a coupon code.';
+        }
+        return;
+    }
+
+    const coupon = CLIENT_COUPONS[code];
+    if (!coupon) {
+        if (notice) {
+            notice.className = 'fs-2xs mt-2 text-danger';
+            notice.innerHTML = `<i class="fa-solid fa-circle-xmark me-1"></i> Invalid coupon code '<strong>${code}</strong>'.`;
+        }
+        currentDiscount = 0;
+        recalculateTotal();
+        return;
+    }
+
+    if (CART_SUBTOTAL < coupon.min) {
+        if (notice) {
+            notice.className = 'fs-2xs mt-2 text-warning';
+            notice.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> Minimum order value for <strong>${code}</strong> is ₹${coupon.min.toFixed(2)}.`;
+        }
+        currentDiscount = 0;
+        recalculateTotal();
+        return;
+    }
+
+    if (coupon.type === 'percent') {
+        currentDiscount = (CART_SUBTOTAL * coupon.val / 100);
+    } else {
+        currentDiscount = Math.min(coupon.val, CART_SUBTOTAL);
+    }
+
+    if (notice) {
+        notice.className = 'fs-2xs mt-2 text-success fw-bold';
+        notice.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Coupon <strong>${code}</strong> applied! You saved ₹${currentDiscount.toFixed(2)} <a href="javascript:void(0)" onclick="removeCouponCode()" class="text-danger ms-2 text-decoration-none">[Remove]</a>`;
+    }
+
+    recalculateTotal();
+}
+
+function removeCouponCode() {
+    const input = document.getElementById('couponCodeInput');
+    const notice = document.getElementById('couponStatusNotice');
+    if (input) input.value = '';
+    currentDiscount = 0;
+    if (notice) {
+        notice.className = 'fs-2xs mt-2 text-muted';
+        notice.textContent = 'Apply coupon to get instant festive savings on checkout.';
+    }
+    recalculateTotal();
+}
+
+function recalculateTotal() {
+    const discountRow = document.getElementById('discountRow');
+    const dispDiscount = document.getElementById('displayDiscount');
+    const dispTotal = document.getElementById('displayGrandTotal');
+
+    if (currentDiscount > 0) {
+        if (discountRow) discountRow.style.display = 'flex';
+        if (dispDiscount) dispDiscount.textContent = `-₹${currentDiscount.toFixed(2)}`;
+    } else {
+        if (discountRow) discountRow.style.display = 'none';
+    }
+
+    const finalTotal = Math.max(0, CART_SUBTOTAL - currentDiscount + currentGiftWrap);
+    if (dispTotal) {
+        dispTotal.textContent = `₹${finalTotal.toFixed(2)}`;
+    }
+}
+
+function selectPaymentMode(radioEl) {
+    document.querySelectorAll('.payment-mode-card').forEach(card => card.classList.remove('active'));
+    radioEl.closest('.payment-mode-card')?.classList.add('active');
+}
+
+// Intercept checkout form submit to validate and populate hidden fallbacks
+const checkoutForm = document.getElementById('auraCheckoutForm');
+if (checkoutForm) {
+    checkoutForm.addEventListener('submit', function(e) {
+        const inputName = document.getElementById('input_customer_name');
+        const inputPhone = document.getElementById('input_customer_phone');
+        const inputEmail = document.getElementById('input_customer_email');
+        const inputAddress = document.getElementById('input_shipping_address');
+        const inputCity = document.getElementById('input_city');
+        const inputPostal = document.getElementById('input_postal_code');
+
+        // Check local storage / header location
+        const savedLoc = localStorage.getItem(LOCATION_STORAGE_KEY) || 'Indiranagar, Bengaluru, 560001';
+        const savedAddressJson = localStorage.getItem(ADDRESS_STORAGE_KEY);
+        let parsed = null;
+        if (savedAddressJson) {
+            try { parsed = JSON.parse(savedAddressJson); } catch (err) {}
+        }
+
+        if (inputName && !inputName.value.trim()) {
+            inputName.value = parsed?.customer_name || "{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% else %}Valued Client{% endif %}";
+        }
+        if (inputPhone && !inputPhone.value.trim()) {
+            inputPhone.value = parsed?.customer_phone || "9876543210";
+        }
+        if (inputEmail && !inputEmail.value.trim()) {
+            inputEmail.value = parsed?.customer_email || "{% if request.user.is_authenticated %}{{ request.user.email }}{% else %}client@aura-luxury.in{% endif %}";
+        }
+        if (inputAddress && !inputAddress.value.trim()) {
+            inputAddress.value = parsed?.shipping_address || savedLoc;
+        }
+        if (inputCity && !inputCity.value.trim()) {
+            inputCity.value = parsed?.city || "Bengaluru";
+        }
+        if (inputPostal && !inputPostal.value.trim()) {
+            inputPostal.value = parsed?.postal_code || "560001";
+        }
+
+        // Show visual placing order spinner on the confirm button
+        const btn = document.getElementById('placeOrderBtn');
+        const btnText = document.getElementById('placeOrderBtnText');
+        const btnArrow = document.getElementById('placeOrderBtnArrow');
+        const lockIcon = document.getElementById('placeOrderLockIcon');
+        if (btn) {
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.85';
+            if (lockIcon) lockIcon.className = 'fa-solid fa-circle-notch fa-spin me-2';
+            if (btnText) btnText.textContent = 'Processing & Placing Order...';
+            if (btnArrow) btnArrow.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

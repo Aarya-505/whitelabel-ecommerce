@@ -1,0 +1,904 @@
+{% extends 'base.html' %}
+{% block title %}{% if query %}Search: “{{ query }}” — AURA Curated Catalog{% elif selected_category_slug %}{{ selected_category_slug|title }} Collection — AURA{% else %}AURA — Modern Luxury, Thoughtfully Curated Catalog{% endif %}{% endblock %}
+
+{% block content %}
+
+{% if not query %}
+<!-- ==========================================
+     0. FLIPKART / AMAZON STYLE CATEGORY BUBBLE NAVIGATION BAR
+     ========================================== -->
+<section class="category-bubble-strip">
+  <div class="container">
+    <div class="bubble-scroll-wrap d-flex align-items-center justify-content-between gap-3 overflow-x-auto py-3">
+      <a href="{% url 'storefront:home' %}#shop" class="bubble-item text-center text-decoration-none {% if not selected_category_slug %}active{% endif %}">
+        <div class="bubble-circle bubble-all">
+          <i class="fa-solid fa-grid-2"></i>
+        </div>
+        <span class="bubble-label">All Items</span>
+      </a>
+
+      {% for cat in categories %}
+        <a href="{% url 'storefront:home' %}?category={{ cat.slug }}#products-section" class="bubble-item text-center text-decoration-none {% if selected_category_slug == cat.slug %}active{% endif %}">
+          <div class="bubble-circle position-relative">
+            <img src="{{ cat.image_url }}" alt="{{ cat.name }}" loading="lazy">
+            {% if forloop.first %}
+              <span class="bubble-hot-badge">TRENDING</span>
+            {% elif forloop.counter == 2 %}
+              <span class="bubble-hot-badge bg-danger">HOT</span>
+            {% endif %}
+          </div>
+          <span class="bubble-label">{{ cat.name }}</span>
+        </a>
+      {% endfor %}
+
+      <a href="#deals" class="bubble-item text-center text-decoration-none">
+        <div class="bubble-circle bubble-deals">
+          <i class="fa-solid fa-bolt text-warning"></i>
+          <span class="bubble-hot-badge bg-warning text-dark">50% OFF</span>
+        </div>
+        <span class="bubble-label text-warning fw-bold">Flash Deals</span>
+      </a>
+
+      <a href="javascript:void(0)" onclick="sendWhatsappPrompt('Hi AURA Store, could you please help me find the best outfits and products for my style?')" class="bubble-item text-center text-decoration-none">
+        <div class="bubble-circle bubble-whatsapp">
+          <i class="fa-brands fa-whatsapp text-white"></i>
+          <span class="bubble-hot-badge bg-success text-white">LIVE</span>
+        </div>
+        <span class="bubble-label text-success fw-bold">Chat Support</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     1. VIBRANT HERO CAROUSEL WITH MODEL PHOTOGRAPHY
+     ========================================== -->
+<section class="hero-shell">
+  <div class="container">
+    <div id="auraHero" class="hero-carousel reveal" data-bs-ride="carousel">
+      
+      <!-- Slide 1: Ethnic & Kurtis (Model in Royal Emerald Kurti Set) -->
+      <div class="hero-panel hero-slide hero-slide-ethnic active">
+        <div class="hero-copy">
+          <span class="eyebrow"><i class="fa-solid fa-sparkles me-1 text-gold"></i> THE RIWAAYAT FESTIVE EDIT · 2026</span>
+          <h1>Regal Chanderi &amp; Silk.<br><em>Handcrafted Kurti Sets.</em></h1>
+          <p>Adorn yourself in pure Chanderi silk, intricate zardozi, and handblock mulmul cotton. Designed for effortless festive grace and modern celebrations.</p>
+          <div class="hero-actions">
+            <a class="btn-luxury gold" href="?category=ethnic-wear#products-section">Shop Kurti Sets <i class="fa-solid fa-arrow-right"></i></a>
+            <a class="btn-luxury outline" href="#deals">Festive Deals (Up to 40% Off) <i class="fa-solid fa-bolt"></i></a>
+          </div>
+        </div>
+        <div class="hero-orbit"><span>HANDCRAFTED<br>ROYAL<br>ETHNIC</span></div>
+        <div class="hero-note"><span>01</span><div><b>Pure Chanderi Silk.</b><br>Embroidered with love.</div></div>
+      </div>
+
+      <!-- Slide 2: Western Luxury & Streetwear (Model in Oversized Hoodie & Camel Coat) -->
+      <div class="hero-panel hero-slide hero-slide-apparel">
+        <div class="hero-copy">
+          <span class="eyebrow"><i class="fa-solid fa-crown me-1 text-gold"></i> SARTORIAL ESSENTIALS</span>
+          <h1>480 GSM Heavyweight Fleece.<br><em>Virgin Merino Overcoats.</em></h1>
+          <p>Architectural streetwear silhouettes and tailored outerwear crafted in organic French Terry and premium European wool.</p>
+          <div class="hero-actions">
+            <a class="btn-luxury gold" href="?category=apparel#products-section">Shop Western Fashion <i class="fa-solid fa-arrow-right"></i></a>
+            <a class="btn-luxury outline" href="#trending-looks">View Trending Looks <i class="fa-solid fa-fire"></i></a>
+          </div>
+        </div>
+        <div class="hero-orbit"><span>ORGANIC<br>TEXTURES<br>CURATED</span></div>
+        <div class="hero-note"><span>02</span><div><b>Tactile Comfort.</b><br>Engineered to last.</div></div>
+      </div>
+
+      <!-- Slide 3: Horology & Audiophile (Model with Gold Watch & ANC Headphones) -->
+      <div class="hero-panel hero-slide hero-slide-tech">
+        <div class="hero-copy">
+          <span class="eyebrow"><i class="fa-solid fa-gem me-1 text-gold"></i> HOROLOGY &amp; ACOUSTICS</span>
+          <h1>Sapphire Automatic Watches.<br><em>Active Noise Cancelling.</em></h1>
+          <p>Titanium drivers, studio-grade acoustics, and Japanese automatic timepieces featuring scratch-proof sapphire crystal.</p>
+          <div class="hero-actions">
+            <a class="btn-luxury gold" href="?category=accessories#products-section">Explore Timepieces <i class="fa-solid fa-arrow-right"></i></a>
+            <a class="btn-luxury outline" href="?category=electronics#products-section">Shop Audio &amp; Tech <i class="fa-solid fa-headphones"></i></a>
+          </div>
+        </div>
+        <div class="hero-orbit"><span>PRECISION<br>ACOUSTICS<br>&amp; TIME</span></div>
+        <div class="hero-note"><span>03</span><div><b>Studio Fidelity.</b><br>Every note defined.</div></div>
+      </div>
+
+      <button class="hero-control hero-prev" type="button" data-bs-target="#auraHero" data-bs-slide="prev" aria-label="Previous"><i class="fa-solid fa-arrow-left"></i></button>
+      <button class="hero-control hero-next" type="button" data-bs-target="#auraHero" data-bs-slide="next" aria-label="Next"><i class="fa-solid fa-arrow-right"></i></button>
+      
+      <div class="hero-indicators">
+        <button type="button" data-bs-target="#auraHero" data-bs-slide-to="0" class="active" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#auraHero" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#auraHero" data-bs-slide-to="2" aria-label="Slide 3"></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Trust Strip -->
+<section class="trust-strip">
+  <div class="container">
+    <div class="row g-3 text-center">
+      <div class="col-6 col-lg-3"><i class="fa-solid fa-certificate text-gold"></i><span>100% Genuine Verified Sourcing</span></div>
+      <div class="col-6 col-lg-3"><i class="fa-solid fa-box text-gold"></i><span>Signature Gift Packaging</span></div>
+      <div class="col-6 col-lg-3"><i class="fa-solid fa-truck-fast text-gold"></i><span>FREE Express Courier Delivery</span></div>
+      <div class="col-6 col-lg-3"><i class="fa-brands fa-whatsapp text-success"></i><span>Live WhatsApp Store Support</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     2.5. TRENDING LOOKS & OUTFITS (Model Visual Showcase)
+     ========================================== -->
+<section class="section-space pb-3" id="trending-looks">
+  <div class="container">
+    <div class="section-heading reveal">
+      <div>
+        <span class="eyebrow"><i class="fa-solid fa-fire text-danger me-1"></i> TRENDING STYLES &amp; MODELS</span>
+        <h2>Shop The Look: Curated by Stylists</h2>
+        <p class="section-subtitle">Real silhouettes and model photography showcasing how our pieces elevate your presence.</p>
+      </div>
+      <span class="section-count">FEATURED EDIT 2026</span>
+    </div>
+
+    <div class="row g-4">
+      <!-- Look 1: Royal Ethnic Kurti Set -->
+      <div class="col-12 col-md-6 col-lg-3 reveal">
+        <div class="look-card position-relative overflow-hidden rounded-4 shadow-md">
+          <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=900&auto=format&fit=crop&q=80" alt="Royal Emerald Kurti Set" class="look-image w-100" style="height: 380px; object-fit: cover;">
+          <div class="look-overlay p-3 d-flex flex-column justify-content-end">
+            <span class="badge bg-gold text-dark fs-2xs fw-bold px-2 py-1 align-self-start mb-2">ETHNIC ELEGANCE</span>
+            <h4 class="text-white fs-6 font-serif mb-1">Chanderi Silk Ananya Kurti</h4>
+            <p class="text-white-50 fs-xs mb-2">Emerald silk with zari embroidery</p>
+            <a href="?category=ethnic-wear#products-section" class="btn btn-sm btn-gold rounded-pill w-100 py-2 fs-xs fw-bold">
+              Shop Ethnic Sets <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Look 2: Luxury Streetwear Hoodie -->
+      <div class="col-12 col-md-6 col-lg-3 reveal">
+        <div class="look-card position-relative overflow-hidden rounded-4 shadow-md">
+          <img src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=900&auto=format&fit=crop&q=80" alt="Oversized Hoodie" class="look-image w-100" style="height: 380px; object-fit: cover;">
+          <div class="look-overlay p-3 d-flex flex-column justify-content-end">
+            <span class="badge bg-danger text-white fs-2xs fw-bold px-2 py-1 align-self-start mb-2">STREETWEAR</span>
+            <h4 class="text-white fs-6 font-serif mb-1">480 GSM Heavyweight Hoodie</h4>
+            <p class="text-white-50 fs-xs mb-2">Charcoal grey organic French terry</p>
+            <a href="?category=apparel#products-section" class="btn btn-sm btn-gold rounded-pill w-100 py-2 fs-xs fw-bold">
+              Shop Hoodies <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Look 3: Sartorial Wool Coat -->
+      <div class="col-12 col-md-6 col-lg-3 reveal">
+        <div class="look-card position-relative overflow-hidden rounded-4 shadow-md">
+          <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=900&auto=format&fit=crop&q=80" alt="Wool Overcoat" class="look-image w-100" style="height: 380px; object-fit: cover;">
+          <div class="look-overlay p-3 d-flex flex-column justify-content-end">
+            <span class="badge bg-gold text-dark fs-2xs fw-bold px-2 py-1 align-self-start mb-2">SARTORIAL</span>
+            <h4 class="text-white fs-6 font-serif mb-1">Milano Tailored Overcoat</h4>
+            <p class="text-white-50 fs-xs mb-2">Virgin Merino camel wool coat</p>
+            <a href="?category=apparel#products-section" class="btn btn-sm btn-gold rounded-pill w-100 py-2 fs-xs fw-bold">
+              Shop Outerwear <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Look 4: Automatic Sapphire Watch on Wrist -->
+      <div class="col-12 col-md-6 col-lg-3 reveal">
+        <div class="look-card position-relative overflow-hidden rounded-4 shadow-md">
+          <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=900&auto=format&fit=crop&q=80" alt="Automatic Watch on Wrist" class="look-image w-100" style="height: 380px; object-fit: cover;">
+          <div class="look-overlay p-3 d-flex flex-column justify-content-end">
+            <span class="badge bg-warning text-dark fs-2xs fw-bold px-2 py-1 align-self-start mb-2">TIMEPIECE</span>
+            <h4 class="text-white fs-6 font-serif mb-1">Chrono Automatic Gold Watch</h4>
+            <p class="text-white-50 fs-xs mb-2">Sapphire crystal &amp; Tuscan leather</p>
+            <a href="?category=accessories#products-section" class="btn btn-sm btn-gold rounded-pill w-100 py-2 fs-xs fw-bold">
+              Shop Watches <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. 4-in-1 Category Discovery Grid (Marketplace Style) -->
+{% if category_quads %}
+<section class="section-space pb-4" id="quad-categories">
+  <div class="container">
+    <div class="section-heading reveal">
+      <div>
+        <span class="eyebrow"><i class="fa-solid fa-layer-group me-1"></i> CURATED EDITIONS</span>
+        <h2>Explore By Department</h2>
+        <p class="section-subtitle">Multi-item visual discovery tiles inspired by leading retail merchandising.</p>
+      </div>
+      <span class="section-count">{{ category_quads|length }} FEATURED DEPARTMENTS</span>
+    </div>
+
+    <div class="row g-4">
+      {% for quad in category_quads %}
+        <div class="col-12 col-md-6 col-xl-3 reveal">
+          <div class="quad-category-card">
+            <div class="quad-header">
+              <h3 class="quad-title">{{ quad.category.name }}</h3>
+              <span class="quad-subtitle">{{ quad.total_count }} pieces</span>
+            </div>
+
+            <!-- 2x2 Image Tile Grid -->
+            <div class="quad-grid">
+              {% for prod in quad.products|slice:':4' %}
+                <a href="{% url 'storefront:product_detail' slug=prod.slug %}" class="quad-tile" title="{{ prod.title }}">
+                  <div class="quad-image-wrap">
+                    <img src="{{ prod.image_url }}" alt="{{ prod.title }}" loading="lazy">
+                  </div>
+                  <span class="quad-item-name">{{ prod.title|truncatechars:22 }}</span>
+                  <strong class="quad-item-price">₹{{ prod.price }}</strong>
+                </a>
+              {% endfor %}
+            </div>
+
+            <div class="quad-footer">
+              <a href="{% url 'storefront:home' %}?category={{ quad.category.slug }}#products-section" class="quad-link">
+                <span>See more in {{ quad.category.name }}</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- 4. Limited-Time Flash Deals Section -->
+{% if flash_deals %}
+<section class="section-space section-muted py-5" id="deals">
+  <div class="container">
+    <div class="deals-header-bar reveal">
+      <div class="d-flex flex-wrap align-items-center gap-3">
+        <span class="badge-deal-pill"><i class="fa-solid fa-bolt text-gold"></i> FLASH DEALS</span>
+        <h2 class="deals-title mb-0">Limited-Time Exclusive Offers</h2>
+      </div>
+      <div class="countdown-timer-box d-flex align-items-center gap-2">
+        <span class="text-muted fs-xs text-uppercase letter-spacing-1">Offer Ends In:</span>
+        <div class="timer-digits">
+          <span class="digit-box" id="deal-hours">08</span> :
+          <span class="digit-box" id="deal-mins">42</span> :
+          <span class="digit-box" id="deal-secs">19</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deals Horizontal Carousel / Grid -->
+    <div class="row g-4 mt-1">
+      {% for product in flash_deals|slice:':4' %}
+        <div class="col-12 col-sm-6 col-lg-3 reveal">
+          <div class="deal-card-wrap">
+            {% include 'storefront/_product_card.html' with product=product %}
+            <!-- Claimed Progress Meter -->
+            <div class="deal-progress-box">
+              <div class="d-flex justify-content-between fs-xs mb-1">
+                <span class="text-muted"><i class="fa-solid fa-fire text-danger me-1"></i> Claimed</span>
+                <strong class="text-gold">{{ product.claimed_percent }}%</strong>
+              </div>
+              <div class="progress deal-progress-bar">
+                <div class="progress-bar" role="progressbar" style="width: {{ product.claimed_percent }}%;" aria-valuenow="{{ product.claimed_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+{% else %}
+<!-- ==========================================
+     DEDICATED SEARCH RESULTS HEADER (When user searches)
+     ========================================== -->
+<section class="search-hero-strip bg-slate-900 text-white py-4 border-bottom border-gold-subtle">
+  <div class="container">
+    <!-- Breadcrumb Bar -->
+    <nav aria-label="breadcrumb" class="mb-2">
+      <ol class="breadcrumb fs-xs text-uppercase letter-spacing-1 mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'storefront:home' %}" class="text-muted text-decoration-none">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'storefront:home' %}#shop" class="text-muted text-decoration-none">Catalog</a></li>
+        <li class="breadcrumb-item active text-gold" aria-current="page">Search: "{{ query }}"</li>
+      </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <span class="eyebrow text-gold mb-1"><i class="fa-solid fa-magnifying-glass me-1"></i> SEARCH RESULTS</span>
+        <h1 class="text-white font-serif mb-1 fs-2">Results for <span class="text-gold">“{{ query }}”</span></h1>
+        <p class="text-muted fs-sm mb-0">
+          Found <strong>{{ products|length }}</strong> piece{{ products|length|pluralize }} matching your search keywords.
+        </p>
+      </div>
+
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <!-- Active query pill with quick clear -->
+        <div class="search-query-pill d-inline-flex align-items-center gap-2 bg-slate-800 border border-secondary px-3 py-2 rounded-pill">
+          <span class="fs-xs text-light">Keyword: <strong>{{ query }}</strong></span>
+          <a href="{% url 'storefront:home' %}{% if selected_category_slug %}?category={{ selected_category_slug }}{% endif %}" class="text-gold text-decoration-none hover-white" title="Clear keyword search">
+            <i class="fa-solid fa-circle-xmark"></i>
+          </a>
+        </div>
+        <a href="{% url 'storefront:home' %}" class="btn btn-sm btn-outline-light px-3 py-2 rounded-pill">
+          <i class="fa-solid fa-rotate-left me-1"></i> Clear All & Show Catalog
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ==========================================
+     5. MAIN CATALOG WITH COMPREHENSIVE FACETED SIDEBAR FILTERS
+     ========================================== -->
+<section class="shop-section {% if query %}pt-4{% endif %}" id="shop">
+  <div class="container" id="products-section">
+    <!-- Active Filters Tag Strip -->
+    {% if active_filters %}
+      <div class="active-filter-strip p-3 mb-4 bg-white border rounded shadow-sm d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <span class="fs-xs text-uppercase fw-bold text-muted me-1"><i class="fa-solid fa-sliders me-1 text-gold"></i> Active Filters:</span>
+          {% for f in active_filters %}
+            <span class="badge bg-gold-light text-dark border border-gold d-inline-flex align-items-center gap-2 py-2 px-3 rounded-pill fs-xs">
+              <span>{{ f.label }}</span>
+              <a href="{{ f.remove_url }}" class="text-danger fw-bold text-decoration-none" title="Remove filter">
+                <i class="fa-solid fa-xmark"></i>
+              </a>
+            </span>
+          {% endfor %}
+        </div>
+        <a href="{% url 'storefront:home' %}{% if query %}?q={{ query }}{% endif %}#products-section" class="btn btn-sm btn-outline-danger px-3 py-1 fs-xs rounded-pill">
+          <i class="fa-solid fa-rotate-left me-1"></i> Clear All Filters
+        </a>
+      </div>
+    {% endif %}
+
+    <div class="row g-4">
+      <!-- Left Faceted Filter Sidebar (Amazon & Flipkart Style) -->
+      <div class="col-lg-3">
+        <aside class="catalog-sidebar sticky-sidebar reveal">
+          <!-- Sidebar Header -->
+          <div class="sidebar-top-header d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
+            <h3 class="fs-5 font-serif mb-0 d-flex align-items-center gap-2">
+              <i class="fa-solid fa-filter text-gold fs-6"></i> Filters
+            </h3>
+            {% if active_filters %}
+              <a href="{% url 'storefront:home' %}{% if query %}?q={{ query }}{% endif %}#products-section" class="fs-xs text-muted text-decoration-underline hover-gold">
+                Reset All
+              </a>
+            {% endif %}
+          </div>
+
+          <form method="get" action="{% url 'storefront:home' %}" id="facetedFilterForm">
+            {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+            <input type="hidden" name="sort" value="{{ sort }}">
+
+            <!-- 1. Department / Category Facet -->
+            <div class="filter-group mb-4">
+              <h4 class="filter-title d-flex justify-content-between align-items-center">
+                <span>Department</span>
+                <i class="fa-solid fa-chevron-down fs-xs text-muted"></i>
+              </h4>
+              <ul class="filter-list">
+                <li>
+                  <a href="?{% if query %}q={{ query }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if min_discount %}min_discount={{ min_discount }}&{% endif %}{% if min_rating %}min_rating={{ min_rating }}&{% endif %}{% if selected_brand %}brand={{ selected_brand }}&{% endif %}{% if selected_color %}color={{ selected_color }}&{% endif %}sort={{ sort }}#products-section" class="{% if not selected_category_slug %}active font-bold{% endif %}">
+                    <span>All Departments</span>
+                    <span class="count">{{ facet_counts.total_search }}</span>
+                  </a>
+                </li>
+                {% for item in category_facet_list %}
+                  <li>
+                    <a href="{{ item.url }}" class="{% if item.is_active %}active font-bold text-gold{% endif %}">
+                      <span>{{ item.category.name }}</span>
+                      <span class="count">{{ item.count }}</span>
+                    </a>
+                    {% if selected_category_slug == item.category.slug and item.category.subcategories.all %}
+                      <ul class="subfilter-list ms-3 mt-1">
+                        {% for sub in item.category.subcategories.all %}
+                          <li>
+                            <a href="?category={{ item.category.slug }}&subcategory={{ sub.slug }}{% if query %}&q={{ query }}{% endif %}{% if selected_brand %}&brand={{ selected_brand }}{% endif %}{% if selected_color %}&color={{ selected_color }}{% endif %}&sort={{ sort }}#products-section" class="{% if selected_subcategory_slug == sub.slug %}active text-gold font-bold{% endif %}">
+                              • {{ sub.name }}
+                            </a>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+
+            <!-- 2. Brand Filter (Amazon / Flipkart Style) -->
+            {% if brand_facet_list %}
+            <div class="filter-group mb-4">
+              <h4 class="filter-title d-flex justify-content-between align-items-center">
+                <span>Brand</span>
+                <i class="fa-solid fa-chevron-down fs-xs text-muted"></i>
+              </h4>
+              <ul class="filter-list">
+                {% for b in brand_facet_list %}
+                  <li>
+                    <a href="{{ b.url }}" class="filter-check-link {% if b.is_active %}active{% endif %}">
+                      <span class="d-flex align-items-center">
+                        <span class="check-box-icon"><i class="fa-solid fa-check"></i></span>
+                        <span>{{ b.name }}</span>
+                      </span>
+                      <span class="count">{{ b.count }}</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+            {% endif %}
+
+            <!-- 3. Colour Filter (Visual Swatches Grid) -->
+            {% if color_facet_list %}
+            <div class="filter-group mb-4">
+              <h4 class="filter-title d-flex justify-content-between align-items-center">
+                <span>Colour</span>
+                <i class="fa-solid fa-chevron-down fs-xs text-muted"></i>
+              </h4>
+              <div class="color-swatches-grid">
+                {% for c in color_facet_list %}
+                  <a href="{{ c.url }}" class="color-swatch-item {% if c.is_active %}active{% endif %}">
+                    <span class="color-swatch-circle" style="background-color: {{ c.hex }};"></span>
+                    <span class="flex-grow-1">{{ c.name }}</span>
+                    <span class="count">{{ c.count }}</span>
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- 4. Price Filter (Presets & Custom Inputs) -->
+            <div class="filter-group mb-4">
+              <h4 class="filter-title d-flex justify-content-between align-items-center">
+                <span>Price</span>
+                <i class="fa-solid fa-chevron-down fs-xs text-muted"></i>
+              </h4>
+              
+              <!-- Quick Price Buckets (Amazon / Flipkart Style) -->
+              <div class="price-buckets mb-3">
+                {% for pb in price_buckets %}
+                  <a href="{{ pb.url }}" class="price-bucket-item d-flex justify-content-between align-items-center {% if pb.is_active %}active font-bold text-gold{% endif %}">
+                    <span>{{ pb.label }}</span>
+                    <span class="count">{{ pb.count }}</span>
+                  </a>
+                {% endfor %}
+              </div>
+
+              <!-- Custom Price Range Inputs -->
+              <div class="custom-price-inputs p-2 bg-light rounded border">
+                <label class="fs-xs text-muted text-uppercase letter-spacing-1 mb-1 d-block">Custom Price Range (₹)</label>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white">₹</span>
+                    <input type="number" name="min_price" class="form-control form-control-sm price-input" placeholder="Min" value="{{ min_price }}" min="0" step="1">
+                  </div>
+                  <span class="text-muted">-</span>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white">₹</span>
+                    <input type="number" name="max_price" class="form-control form-control-sm price-input" placeholder="Max" value="{{ max_price }}" min="0" step="1">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-sm btn-dark w-100 py-1">
+                  <i class="fa-solid fa-check me-1"></i> Apply Price Range
+                </button>
+              </div>
+            </div>
+
+            <!-- 5. Material & Craftsmanship Facet -->
+            {% if material_facet_list %}
+            <div class="filter-group mb-4">
+              <h4 class="filter-title d-flex justify-content-between align-items-center">
+                <span>Material & Craft</span>
+                <i class="fa-solid fa-chevron-down fs-xs text-muted"></i>
+              </h4>
+              <ul class="filter-list">
+                {% for m in material_facet_list %}
+                  <li>
+                    <a href="{{ m.url }}" class="filter-check-link {% if m.is_active %}active{% endif %}">
+                      <span class="d-flex align-items-center">
+                        <span class="check-box-icon"><i class="fa-solid fa-check"></i></span>
+                        <span class="fs-xs">{{ m.name }}</span>
+                      </span>
+                      <span class="count">{{ m.count }}</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+            {% endif %}
+
+            <!-- 6. Connectivity & Interface (Electronics & Gadgets) -->
+            {% if connectivity_facet_list %}
+            <div class="filter-group mb-4">
+              <h4 class="filter-title d-flex justify-content-between align-items-center">
+                <span>Connectivity</span>
+                <i class="fa-solid fa-chevron-down fs-xs text-muted"></i>
+              </h4>
+              <ul class="filter-list">
+                {% for conn in connectivity_facet_list %}
+                  <li>
+                    <a href="{{ conn.url }}" class="filter-check-link {% if conn.is_active %}active{% endif %}">
+                      <span class="d-flex align-items-center">
+                        <span class="check-box-icon"><i class="fa-solid fa-check"></i></span>
+                        <span class="fs-xs">{{ conn.name }}</span>
+                      </span>
+                      <span class="count">{{ conn.count }}</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+            {% endif %}
+
+            <!-- 7. Special Features Facet -->
+            {% if feature_facet_list %}
+            <div class="filter-group mb-4">
+              <h4 class="filter-title d-flex justify-content-between align-items-center">
+                <span>Special Features</span>
+                <i class="fa-solid fa-chevron-down fs-xs text-muted"></i>
+              </h4>
+              <div class="filter-pill-cloud">
+                {% for feat in feature_facet_list %}
+                  <a href="{{ feat.url }}" class="filter-pill-item {% if feat.is_active %}active{% endif %}">
+                    <span>{{ feat.name }}</span>
+                    <span class="count">{{ feat.count }}</span>
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- 8. Discount & Special Offers Filter (Flipkart / Amazon Style) -->
+            <div class="filter-group mb-4">
+              <h4 class="filter-title d-flex justify-content-between align-items-center">
+                <span>Discounts & Deals</span>
+                <i class="fa-solid fa-chevron-down fs-xs text-muted"></i>
+              </h4>
+              <ul class="filter-list">
+                {% for d in discount_facets %}
+                  <li>
+                    <a href="{{ d.url }}" class="{% if d.is_active %}active font-bold text-gold{% endif %}">
+                      <span>{{ d.label }}</span>
+                      <span class="count">{{ d.count }}</span>
+                    </a>
+                  </li>
+                {% endfor %}
+                <li>
+                  <a href="?only_deals=1{% if query %}&q={{ query }}{% endif %}{% if selected_category_slug %}&category={{ selected_category_slug }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}&sort={{ sort }}#products-section" class="{% if only_deals == '1' %}active font-bold text-gold{% endif %}">
+                    <span class="text-danger fw-semibold"><i class="fa-solid fa-bolt text-gold me-1"></i> Flash Deals Only</span>
+                    <span class="count">{{ facet_counts.deals }}</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 9. Customer Review Rating Filter -->
+            <div class="filter-group mb-4">
+              <h4 class="filter-title d-flex justify-content-between align-items-center">
+                <span>Customer Review</span>
+                <i class="fa-solid fa-chevron-down fs-xs text-muted"></i>
+              </h4>
+              <div class="rating-filter-options">
+                {% for rf in rating_facets %}
+                  <a href="{{ rf.url }}" class="rating-choice {% if rf.is_active %}active{% endif %}">
+                    <div class="stars">
+                      {% if rf.value == '4.8' %}
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-solid fa-star text-gold"></i>
+                      {% elif rf.value == '4.5' %}
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-regular fa-star text-gold"></i>
+                      {% else %}
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-solid fa-star text-gold"></i>
+                        <i class="fa-regular fa-star text-muted"></i>
+                      {% endif %}
+                    </div>
+                    <span>{{ rf.label }}</span>
+                    <span class="count ms-auto text-muted fs-xs">({{ rf.count }})</span>
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- 10. Availability & Delivery Speed -->
+            <div class="filter-group mb-4">
+              <h4 class="filter-title d-flex justify-content-between align-items-center">
+                <span>Availability & Delivery</span>
+                <i class="fa-solid fa-chevron-down fs-xs text-muted"></i>
+              </h4>
+              <div class="form-check custom-checkbox mb-2">
+                <input class="form-check-input" type="checkbox" name="in_stock" value="1" id="inStockCheck" {% if in_stock_only == '1' %}checked{% endif %} onchange="document.getElementById('facetedFilterForm').submit()">
+                <label class="form-check-label fs-xs d-flex justify-content-between w-100" for="inStockCheck">
+                  <span><i class="fa-solid fa-circle-check text-success me-1"></i> In Stock Only</span>
+                  <span class="text-muted">({{ facet_counts.in_stock }})</span>
+                </label>
+              </div>
+              <div class="form-check custom-checkbox">
+                <input class="form-check-input" type="checkbox" name="fast_delivery" value="1" id="fastDeliveryCheck" {% if fast_delivery == '1' %}checked{% endif %} onchange="document.getElementById('facetedFilterForm').submit()">
+                <label class="form-check-label fs-xs d-flex justify-content-between w-100" for="fastDeliveryCheck">
+                  <span><i class="fa-solid fa-truck-fast text-gold me-1"></i> Tomorrow Delivery</span>
+                  <span class="text-muted">({{ facet_counts.fast_delivery }})</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 11. Merchandising Badges -->
+            <div class="filter-group mb-3">
+              <h4 class="filter-title d-flex justify-content-between align-items-center">
+                <span>Curated Editions</span>
+                <i class="fa-solid fa-chevron-down fs-xs text-muted"></i>
+              </h4>
+              <ul class="filter-list">
+                <li>
+                  <a href="?badge=best_seller{% if query %}&q={{ query }}{% endif %}{% if selected_category_slug %}&category={{ selected_category_slug }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if selected_brand %}&brand={{ selected_brand }}{% endif %}{% if selected_color %}&color={{ selected_color }}{% endif %}&sort={{ sort }}#products-section" class="{% if badge_filter == 'best_seller' %}active font-bold text-gold{% endif %}">
+                    <span><i class="fa-solid fa-crown text-gold me-1"></i> Best Sellers</span>
+                    <span class="count">{{ facet_counts.best_sellers }}</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </form>
+        </aside>
+      </div>
+
+      <!-- Right Catalog Products Grid -->
+      <div class="col-lg-9">
+        <!-- Sorting & Display Bar -->
+        <div class="catalog-control-bar d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom reveal">
+          <div class="active-tags d-flex flex-wrap gap-2 align-items-center">
+            <span class="fs-xs text-uppercase fw-bold text-muted">
+              Showing <strong>{{ products|length }}</strong> of {{ facet_counts.total_search }} items
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center gap-2 sort-wrapper">
+            <label for="catalogSort" class="fs-xs text-uppercase text-muted mb-0 fw-semibold">Sort By:</label>
+            <select id="catalogSort" class="form-select form-select-sm luxury-select" onchange="location = this.value;">
+              <option value="?{% if selected_category_slug %}category={{ selected_category_slug }}&{% endif %}{% if query %}q={{ query }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if min_discount %}min_discount={{ min_discount }}&{% endif %}{% if min_rating %}min_rating={{ min_rating }}&{% endif %}sort=featured#products-section" {% if sort == 'featured' %}selected{% endif %}>Featured & Relevant</option>
+              <option value="?{% if selected_category_slug %}category={{ selected_category_slug }}&{% endif %}{% if query %}q={{ query }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if min_discount %}min_discount={{ min_discount }}&{% endif %}{% if min_rating %}min_rating={{ min_rating }}&{% endif %}sort=price_low#products-section" {% if sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+              <option value="?{% if selected_category_slug %}category={{ selected_category_slug }}&{% endif %}{% if query %}q={{ query }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if min_discount %}min_discount={{ min_discount }}&{% endif %}{% if min_rating %}min_rating={{ min_rating }}&{% endif %}sort=price_high#products-section" {% if sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+              <option value="?{% if selected_category_slug %}category={{ selected_category_slug }}&{% endif %}{% if query %}q={{ query }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if min_discount %}min_discount={{ min_discount }}&{% endif %}{% if min_rating %}min_rating={{ min_rating }}&{% endif %}sort=discount#products-section" {% if sort == 'discount' %}selected{% endif %}>Highest Discount %</option>
+              <option value="?{% if selected_category_slug %}category={{ selected_category_slug }}&{% endif %}{% if query %}q={{ query }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if min_discount %}min_discount={{ min_discount }}&{% endif %}{% if min_rating %}min_rating={{ min_rating }}&{% endif %}sort=rating#products-section" {% if sort == 'rating' %}selected{% endif %}>Customer Rating</option>
+              <option value="?{% if selected_category_slug %}category={{ selected_category_slug }}&{% endif %}{% if query %}q={{ query }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if min_discount %}min_discount={{ min_discount }}&{% endif %}{% if min_rating %}min_rating={{ min_rating }}&{% endif %}sort=popular#products-section" {% if sort == 'popular' %}selected{% endif %}>Most Popular</option>
+              <option value="?{% if selected_category_slug %}category={{ selected_category_slug }}&{% endif %}{% if query %}q={{ query }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if min_discount %}min_discount={{ min_discount }}&{% endif %}{% if min_rating %}min_rating={{ min_rating }}&{% endif %}sort=newest#products-section" {% if sort == 'newest' %}selected{% endif %}>Newest Arrivals</option>
+              <option value="?{% if selected_category_slug %}category={{ selected_category_slug }}&{% endif %}{% if query %}q={{ query }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if min_discount %}min_discount={{ min_discount }}&{% endif %}{% if min_rating %}min_rating={{ min_rating }}&{% endif %}sort=name#products-section" {% if sort == 'name' %}selected{% endif %}>Alphabetical (A-Z)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Product Cards Grid -->
+        <div class="row g-4">
+          {% for product in products %}
+            <div class="col-12 col-sm-6 col-md-4 reveal">
+              {% include 'storefront/_product_card.html' with product=product %}
+            </div>
+          {% empty %}
+            <div class="col-12">
+              <div class="empty-state p-5 bg-white border rounded shadow-sm text-center">
+                <div class="empty-icon-wrap mb-3">
+                  <i class="fa-solid fa-magnifying-glass text-gold fs-1"></i>
+                </div>
+                <h3 class="font-serif fs-3 mb-2">No Matching Pieces Found</h3>
+                <p class="text-muted max-w-md mx-auto mb-4">
+                  {% if query %}
+                    We couldn't find any products matching <strong>“{{ query }}”</strong> with your selected filters.
+                  {% else %}
+                    No pieces match your selected filter criteria.
+                  {% endif %}
+                  Try clearing some filters, expanding your price range, or exploring our curated best sellers below.
+                </p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                  <a class="btn btn-gold px-4 py-2" href="{% url 'storefront:home' %}{% if query %}?q={{ query }}{% endif %}">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Reset Filters for "{{ query|default:'Catalog' }}"
+                  </a>
+                  {% for cat in categories|slice:':3' %}
+                    <a class="btn btn-outline-dark btn-sm px-3 py-2" href="{% url 'storefront:home' %}?category={{ cat.slug }}">
+                      Explore {{ cat.name }}
+                    </a>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if not query %}
+<!-- ==========================================
+     6. BEST SELLERS CURATED RAIL (Home Only)
+     ========================================== -->
+{% if best_sellers %}
+<section class="section-space section-muted py-5" id="best-sellers">
+  <div class="container">
+    <div class="section-heading reveal">
+      <div>
+        <span class="eyebrow"><i class="fa-solid fa-crown text-gold me-1"></i> HIGH-DEMAND EDIT</span>
+        <h2>Best Sellers</h2>
+        <p class="section-subtitle">Consistently praised for craftsmanship, tactile beauty, and reliability.</p>
+      </div>
+      <a class="text-link" href="#shop">View All <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <div class="product-strip product-rail">
+      {% for product in best_sellers %}
+        {% include 'storefront/_product_card.html' with product=product %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ==========================================
+     7. CATEGORY-WISE HORIZONTAL BROWSING RAILS (Home Only)
+     ========================================== -->
+{% if category_sections %}
+<section class="category-rails section-space pt-5">
+  <div class="container">
+    <div class="section-heading reveal">
+      <div>
+        <span class="eyebrow"><i class="fa-solid fa-compass me-1"></i> CATEGORY CURATIONS</span>
+        <h2>Explore Every Room & Wardrobe</h2>
+        <p class="section-subtitle">Fast horizontal product rails designed for visual scanning.</p>
+      </div>
+    </div>
+
+    {% for section in category_sections %}
+      <div class="category-rail-block reveal mb-5">
+        <div class="rail-heading d-flex justify-content-between align-items-end mb-3">
+          <div>
+            <span class="eyebrow">{{ forloop.counter|stringformat:'02d' }} · {{ section.category.name|upper }}</span>
+            <h3 class="rail-title mb-0">{{ section.category.name }}</h3>
+          </div>
+          <a class="text-link" href="?category={{ section.category.slug }}#products-section">
+            Shop {{ section.category.name }} <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+
+        {% if section.category.subcategories.all %}
+          <div class="rail-subcategories mb-3">
+            {% for sub in section.category.subcategories.all %}
+              <a href="?category={{ section.category.slug }}&subcategory={{ sub.slug }}#products-section">
+                {{ sub.name }} <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="product-strip product-rail">
+          {% for product in section.products %}
+            {% include 'storefront/_product_card.html' with product=product %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% else %}
+<!-- ==========================================
+     RECOMMENDED BEST SELLERS (When search is active or empty)
+     ========================================== -->
+{% if best_sellers %}
+<section class="section-space section-muted py-5 mt-4" id="recommended">
+  <div class="container">
+    <div class="section-heading reveal">
+      <div>
+        <span class="eyebrow"><i class="fa-solid fa-sparkles text-gold me-1"></i> CURATED ALTERNATIVES</span>
+        <h2>Popular Discoveries You May Also Like</h2>
+        <p class="section-subtitle">Top rated essentials favored by our community of collectors and designers.</p>
+      </div>
+      <a class="text-link" href="{% url 'storefront:home' %}">View Full Catalog <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <div class="product-strip product-rail">
+      {% for product in best_sellers %}
+        {% include 'storefront/_product_card.html' with product=product %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endif %}
+
+<!-- ==========================================
+     8. EDITORIAL BRAND HERITAGE & STORY
+     ========================================== -->
+<section class="editorial-band reveal" id="story">
+  <div class="container">
+    <div class="editorial-panel">
+      <div class="editorial-image"></div>
+      <div class="editorial-copy">
+        <span class="eyebrow"><i class="fa-solid fa-feather text-gold me-1"></i> THE AURA MANIFESTO</span>
+        <h2>Less noise.<br><em>More character.</em></h2>
+        <p>In an era of fleeting trends and excess, AURA champions intentional craftsmanship. We partner directly with artisan workshops and precision fabricators to create enduring pieces designed to live with you.</p>
+        <div class="editorial-stats d-flex gap-4 mt-3 mb-4">
+          <div>
+            <strong class="fs-4 d-block font-serif text-gold">100%</strong>
+            <span class="fs-xs text-uppercase text-muted">Quality Tested</span>
+          </div>
+          <div>
+            <strong class="fs-4 d-block font-serif text-gold">0%</strong>
+            <span class="fs-xs text-uppercase text-muted">Synthetic Waste</span>
+          </div>
+          <div>
+            <strong class="fs-4 d-block font-serif text-gold">30-Day</strong>
+            <span class="fs-xs text-uppercase text-muted">Trial Period</span>
+          </div>
+        </div>
+        <a href="{% url 'storefront:home' %}#shop" class="btn-luxury gold align-self-start">Shop The Collection <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     9. NEWSLETTER SUBSCRIPTION
+     ========================================== -->
+<section class="newsletter-section pb-5" id="newsletter">
+  <div class="container">
+    <div class="newsletter-card reveal">
+      <span class="eyebrow"><i class="fa-solid fa-envelope text-gold me-1"></i> EXCLUSIVE PRIVILEGE</span>
+      <h2>Stay Close To The Next Edit.</h2>
+      <p>Receive private catalog releases, seasonal archives, and private invitations — strictly curated without spam.</p>
+      <form action="{% url 'storefront:newsletter_signup' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <div class="input-group newsletter-input-group">
+          <input type="email" name="email" class="form-control" placeholder="Enter your email address" required aria-label="Email address">
+          <button class="btn btn-luxury dark" type="submit">Join Private Access <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const hero = document.getElementById('auraHero');
+  if (hero) new bootstrap.Carousel(hero, {interval: 5500, ride: 'carousel', pause: 'hover', touch: true});
+
+  // Deal countdown ticker simulation
+  let hours = 8, mins = 42, secs = 19;
+  setInterval(() => {
+    if (secs > 0) { secs--; }
+    else {
+      secs = 59;
+      if (mins > 0) { mins--; }
+      else { mins = 59; if (hours > 0) hours--; }
+    }
+    const pad = (n) => String(n).padStart(2, '0');
+    const hEl = document.getElementById('deal-hours');
+    const mEl = document.getElementById('deal-mins');
+    const sEl = document.getElementById('deal-secs');
+    if (hEl) hEl.textContent = pad(hours);
+    if (mEl) mEl.textContent = pad(mins);
+    if (sEl) sEl.textContent = pad(secs);
+  }, 1000);
+});
+</script>
+{% endblock %}

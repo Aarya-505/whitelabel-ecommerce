@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Orders & Purchase History | AURA Luxury Commerce{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+    
+    <!-- Top Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-3 border-bottom">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <a href="{% url 'storefront:home' %}" class="text-muted hover-gold text-decoration-none fs-xs">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Return to Store
+                </a>
+                <span class="text-muted fs-xs">•</span>
+                <span class="badge bg-gold-light text-gold fs-2xs px-2 py-1 rounded-pill">
+                    <i class="fa-solid fa-boxes-stacked me-1"></i> Order Management
+                </span>
+            </div>
+            <h1 class="font-serif fs-2 fw-bold text-dark mb-0">Your Orders & Deliveries</h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'storefront:home' %}#products-section" class="btn btn-gold btn-sm rounded-pill px-4 fw-bold">
+                <i class="fa-solid fa-bag-shopping me-1"></i> Continue Shopping
+            </a>
+        </div>
+    </div>
+
+    {% if orders %}
+        <div class="row g-4 mb-5">
+            {% for order in orders %}
+                <div class="col-12">
+                    <div class="card border-0 rounded-4 shadow-sm overflow-hidden bg-white">
+                        <!-- Order Header Strip -->
+                        <div class="card-header bg-slate-900 text-white p-3 p-md-4 border-0">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-6 col-md-3">
+                                    <span class="fs-2xs text-uppercase letter-spacing-1 text-muted-white d-block">Order Placed</span>
+                                    <strong class="fs-xs text-white">{{ order.created_at|date:"F d, Y · H:i" }}</strong>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span class="fs-2xs text-uppercase letter-spacing-1 text-muted-white d-block">Total Paid</span>
+                                    <strong class="fs-sm text-gold">₹{{ order.total_amount }}</strong>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span class="fs-2xs text-uppercase letter-spacing-1 text-muted-white d-block">Ship To</span>
+                                    <strong class="fs-xs text-white text-truncate d-block">{{ order.customer_name }}</strong>
+                                </div>
+                                <div class="col-6 col-md-3 text-end">
+                                    <span class="fs-2xs text-uppercase letter-spacing-1 text-muted-white d-block">Order Number</span>
+                                    <strong class="fs-xs text-gold">#{{ order.order_number }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Body -->
+                        <div class="card-body p-3 p-md-4">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-2 border-bottom">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    {% if order.status == 'Delivered' %}
+                                        <span class="badge bg-success-subtle text-success fs-xs px-3 py-1 rounded-pill"><i class="fa-solid fa-circle-check me-1"></i> Delivered</span>
+                                    {% elif order.status == 'Shipped' %}
+                                        <span class="badge bg-info-subtle text-info fs-xs px-3 py-1 rounded-pill"><i class="fa-solid fa-truck-fast me-1"></i> Shipped</span>
+                                    {% elif order.status == 'Processing' %}
+                                        <span class="badge bg-primary-subtle text-primary fs-xs px-3 py-1 rounded-pill"><i class="fa-solid fa-box-open me-1"></i> Processing</span>
+                                    {% elif order.status == 'Cancelled' %}
+                                        <span class="badge bg-danger-subtle text-danger fs-xs px-3 py-1 rounded-pill"><i class="fa-solid fa-circle-xmark me-1"></i> Cancelled</span>
+                                    {% else %}
+                                        <span class="badge bg-gold-light text-gold fs-xs px-3 py-1 rounded-pill"><i class="fa-solid fa-clock me-1"></i> {{ order.status }}</span>
+                                    {% endif %}
+                                    
+                                    {% if order.is_gift %}
+                                        <span class="badge bg-purple-subtle text-purple fs-2xs px-2 py-1 rounded-pill border border-purple-subtle"><i class="fa-solid fa-gift me-1"></i> Gift for {{ order.gift_recipient_name|default:'Loved One' }}</span>
+                                    {% endif %}
+                                    {% if order.discount_amount and order.discount_amount > 0 %}
+                                        <span class="badge bg-success-subtle text-success fs-2xs px-2 py-1 rounded-pill"><i class="fa-solid fa-tag me-1"></i> Coupon Saved ₹{{ order.discount_amount }}</span>
+                                    {% endif %}
+                                    <span class="fs-xs text-muted"><i class="fa-solid fa-location-dot text-gold me-1"></i> {{ order.city }} ({{ order.address_type|default:'Home' }})</span>
+                                </div>
+                                <a href="{% url 'storefront:order_success' order_number=order.order_number %}" class="btn btn-outline-dark btn-sm rounded-pill px-3 fs-xs fw-semibold">
+                                    <i class="fa-solid fa-receipt me-1 text-gold"></i> View Receipt & Tracking
+                                </a>
+                            </div>
+
+                            <div class="d-flex flex-column gap-3">
+                                {% for item in order.items.all %}
+                                    <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3 p-3 bg-light rounded-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            {% if item.product and item.product.image_url %}
+                                                <img src="{{ item.product.image_url }}" alt="{{ item.product.title }}" class="rounded-3 object-fit-cover shadow-2xs" style="width: 60px; height: 60px;">
+                                            {% else %}
+                                                <div class="bg-secondary text-white rounded-3 d-grid place-items-center" style="width: 60px; height: 60px;">
+                                                    <i class="fa-solid fa-box"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                {% if item.product %}
+                                                    <a href="{% url 'storefront:product_detail' slug=item.product.slug %}" class="text-dark fw-bold text-decoration-none fs-xs hover-gold d-block mb-1">
+                                                        {{ item.product.title }}
+                                                    </a>
+                                                    <div class="fs-2xs text-muted mb-1 d-flex flex-wrap align-items-center gap-2">
+                                                        <span>{{ item.product.category.name|default:'AURA Edition' }}</span>
+                                                        <span>•</span>
+                                                        <span>Qty: {{ item.quantity }} × ₹{{ item.price_at_purchase }}</span>
+                                                        {% if item.size %}
+                                                            <span class="badge bg-white text-dark border fs-3xs px-2 py-0">
+                                                                <i class="fa-solid fa-shirt text-gold me-1"></i> Size: {{ item.size }}
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                {% else %}
+                                                    <span class="fs-xs text-muted">AURA Archive Piece</span>
+                                                    <div class="fs-2xs text-muted">
+                                                        Qty: {{ item.quantity }} × ₹{{ item.price_at_purchase }}
+                                                        {% if item.size %} • Size: {{ item.size }}{% endif %}
+                                                    </div>
+                                                {% endif %}
+                                                <strong class="fs-xs text-dark d-sm-none">Total: ₹{{ item.subtotal }}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-3 align-self-end align-self-sm-center">
+                                            <strong class="fs-sm text-dark d-none d-sm-block">₹{{ item.subtotal }}</strong>
+                                            
+                                            {% if item.product %}
+                                                <!-- Action Buttons: Rate & Buy Again -->
+                                                <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3 fs-xs" data-bs-toggle="modal" data-bs-target="#reviewModal{{ item.product.id }}">
+                                                    <i class="fa-solid fa-star text-gold me-1"></i> Rate Product
+                                                </button>
+
+                                                <!-- Review Modal for This Product -->
+                                                <div class="modal fade" id="reviewModal{{ item.product.id }}" tabindex="-1" aria-labelledby="reviewModalLabel{{ item.product.id }}" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content rounded-4 border-0 shadow-lg">
+                                                            <div class="modal-header bg-slate-900 text-white p-3 px-4 border-0">
+                                                                <h5 class="modal-title font-serif fs-6" id="reviewModalLabel{{ item.product.id }}">
+                                                                    <i class="fa-solid fa-star text-gold me-2"></i> Review {{ item.product.title|truncatechars:35 }}
+                                                                </h5>
+                                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <form method="post" action="{% url 'storefront:add_product_review' product_id=item.product.id %}">
+                                                                {% csrf_token %}
+                                                                <div class="modal-body p-4">
+                                                                    <div class="d-flex align-items-center gap-3 pb-3 mb-3 border-bottom">
+                                                                        <img src="{{ item.product.image_url }}" alt="{{ item.product.title }}" class="rounded-2 object-fit-cover" style="width: 48px; height: 48px;">
+                                                                        <div>
+                                                                            <strong class="fs-xs d-block text-dark">{{ item.product.title }}</strong>
+                                                                            <span class="fs-2xs text-success"><i class="fa-solid fa-circle-check me-1"></i> Verified Purchase</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label luxury-label mb-1">Your Overall Rating *</label>
+                                                                        <select name="rating" class="form-select luxury-input fs-xs">
+                                                                            <option value="5" selected>⭐⭐⭐⭐⭐ (5/5) Outstanding Luxury Experience</option>
+                                                                            <option value="4">⭐⭐⭐⭐ (4/5) Very Good Quality</option>
+                                                                            <option value="3">⭐⭐⭐ (3/5) Average / Met Expectations</option>
+                                                                            <option value="2">⭐⭐ (2/5) Below Expectations</option>
+                                                                            <option value="1">⭐ (1/5) Poor / Unsatisfactory</option>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label luxury-label mb-1">Headline / Review Title</label>
+                                                                        <input type="text" name="title" class="form-control luxury-input fs-xs" placeholder="e.g. Exceptional fit and premium fabric feel!">
+                                                                    </div>
+
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label luxury-label mb-1">Detailed Feedback & Experience</label>
+                                                                        <textarea name="comment" rows="3" class="form-control luxury-input fs-xs" placeholder="Share your experience with the craftsmanship, packaging, and delivery speed..."></textarea>
+                                                                    </div>
+
+                                                                    <div class="row g-2">
+                                                                        <div class="col-6">
+                                                                            <label class="form-label luxury-label mb-1">Your Name</label>
+                                                                            <input type="text" name="reviewer_name" class="form-control luxury-input fs-xs" value="{{ order.customer_name }}" placeholder="Your Name">
+                                                                        </div>
+                                                                        <div class="col-6">
+                                                                            <label class="form-label luxury-label mb-1">Email</label>
+                                                                            <input type="email" name="reviewer_email" class="form-control luxury-input fs-xs" value="{{ order.customer_email }}" placeholder="Your Email">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer p-3 bg-light border-0">
+                                                                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                                                    <button type="submit" class="btn btn-gold btn-sm rounded-pill px-4 fw-bold">Submit Review</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm p-5 mb-5">
+            <div class="fs-1 text-muted mb-3"><i class="fa-solid fa-box-open text-gold"></i></div>
+            <h3 class="font-serif fs-3 fw-bold text-dark mb-2">No Active Orders</h3>
+            <p class="text-muted fs-xs mb-4">You have not placed any orders recently. Discover timeless elegance, festive luxury, and curated pieces.</p>
+            <a href="{% url 'storefront:home' %}#products-section" class="btn btn-gold rounded-pill px-4 py-2 fw-bold">
+                Start Exploring Catalog
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- ========================================== -->
+    <!-- AMAZON / FLIPKART STYLE RECOMMENDATIONS     -->
+    <!-- "Inspired by Your Purchases & Preferences" -->
+    <!-- ========================================== -->
+    {% if recommendations %}
+        <div class="recommendations-section mt-5 pt-4 border-top">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <span class="fs-2xs text-uppercase letter-spacing-1 text-gold fw-bold d-block">
+                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Curated For You
+                    </span>
+                    <h3 class="font-serif fs-4 fw-bold text-dark mb-0">Inspired by Your Recent Purchases & Browsing</h3>
+                </div>
+                <a href="{% url 'storefront:home' %}#products-section" class="text-gold text-decoration-none fs-xs fw-bold hover-gold">
+                    View All <i class="fa-solid fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 g-lg-4">
+                {% for prod in recommendations %}
+                    <div class="col">
+                        <div class="product-card h-100 bg-white rounded-4 border p-3 shadow-2xs transition-all hover-shadow-md position-relative d-flex flex-column justify-content-between">
+                            {% if prod.is_best_seller %}
+                                <span class="badge bg-gold text-dark position-absolute top-0 start-0 m-3 fs-2xs px-2 py-1 fw-bold rounded-pill shadow-2xs z-2">
+                                    #1 Best Seller
+                                </span>
+                            {% elif prod.discount_percent >= 20 %}
+                                <span class="badge bg-danger text-white position-absolute top-0 start-0 m-3 fs-2xs px-2 py-1 fw-bold rounded-pill shadow-2xs z-2">
+                                    {{ prod.discount_percent }}% OFF
+                                </span>
+                            {% endif %}
+
+                            <a href="{% url 'storefront:product_detail' slug=prod.slug %}" class="d-block overflow-hidden rounded-3 mb-2 text-decoration-none position-relative" style="height: 180px;">
+                                <img src="{{ prod.image_url }}" alt="{{ prod.title }}" class="w-100 h-100 object-fit-cover transition-transform hover-scale">
+                            </a>
+
+                            <div>
+                                <span class="fs-2xs text-muted text-uppercase letter-spacing-1 d-block mb-1">{{ prod.category.name|default:'AURA Edition' }}</span>
+                                <a href="{% url 'storefront:product_detail' slug=prod.slug %}" class="text-dark text-decoration-none fw-bold fs-xs d-block text-truncate mb-1 hover-gold">
+                                    {{ prod.title }}
+                                </a>
+                                <div class="d-flex align-items-center gap-1 mb-2">
+                                    <span class="badge bg-success text-white fs-2xs px-1 py-0 rounded">{{ prod.rating }} ★</span>
+                                    <span class="fs-2xs text-muted">({{ prod.review_count|default:'120' }})</span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                                <div>
+                                    <strong class="fs-sm text-dark">₹{{ prod.price }}</strong>
+                                    {% if prod.original_price and prod.original_price > prod.price %}
+                                        <del class="fs-2xs text-muted ms-1">₹{{ prod.original_price }}</del>
+                                    {% endif %}
+                                </div>
+                                <form method="post" action="{% url 'cart:cart_add' prod.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-outline-dark btn-sm rounded-circle p-0 d-grid place-items-center hover-gold" style="width: 32px; height: 32px;" title="Add to Bag">
+                                        <i class="fa-solid fa-plus fs-xs"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

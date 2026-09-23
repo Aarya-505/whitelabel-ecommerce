@@ -1,0 +1,124 @@
+<article class="product-tile reveal">
+  <div class="product-media product-media-gallery position-relative overflow-hidden">
+    <a href="{% url 'storefront:product_detail' slug=product.slug %}" class="product-image-link" aria-label="View {{ product.title }}">
+      <img class="product-image primary-image" src="{{ product.image_url }}" alt="{{ product.title }}" loading="lazy">
+      {% with gallery=product.images.all %}
+        {% if gallery|length > 0 %}
+          {% for gallery_image in gallery|slice:":1" %}
+            <img class="product-image secondary-image" src="{{ gallery_image.image_url }}" alt="{{ product.title }} on model" loading="lazy">
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </a>
+
+    <!-- Merchandising Urgency Badges (Flipkart / Amazon Style) -->
+    <div class="product-badges">
+      {% if product.is_best_seller %}
+        <span class="badge-bestseller"><i class="fa-solid fa-crown me-1"></i> BEST SELLER</span>
+      {% elif product.is_deal %}
+        <span class="badge-deal"><i class="fa-solid fa-bolt me-1"></i> DEAL OF THE DAY · {{ product.discount_percent }}% OFF</span>
+      {% elif product.is_low_stock %}
+        <span class="badge-lowstock"><i class="fa-solid fa-fire me-1"></i> ONLY {{ product.stock_quantity }} LEFT</span>
+      {% else %}
+        <span class="badge-discount">{{ product.discount_percent }}% OFF</span>
+      {% endif %}
+    </div>
+
+    <!-- Multi-image / Model preview Indicator -->
+    {% with image_count=product.images.all|length %}
+      {% if image_count > 0 %}
+        <span class="image-count-badge" title="Hover to view model wear / alternate view">
+          <i class="fa-regular fa-images me-1"></i> Lookbook
+        </span>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Wishlist Heart Button -->
+    <form method="post" action="{% url 'storefront:toggle_wishlist' product_id=product.id %}" class="wishlist-form">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button class="wishlist-btn {% if product.id in wishlist_ids %}saved{% endif %}" type="submit" aria-label="Toggle wishlist" title="Save to Wishlist">
+        <i class="{% if product.id in wishlist_ids %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
+      </button>
+    </form>
+
+    <!-- Quick WhatsApp Inquiry Button on Card -->
+    <button type="button" class="card-whatsapp-btn" onclick="sendWhatsappPrompt('Hi AURA Store, I would like to inquire about {{ product.title|escapejs }} (₹{{ product.price }}). Is it currently available in my size?')" title="Inquire on WhatsApp" aria-label="Ask on WhatsApp">
+      <i class="fa-brands fa-whatsapp"></i>
+    </button>
+
+    <!-- Quick View / Inspect Overlay Link -->
+    <div class="quick-action-overlay">
+      <a class="quick-link" href="{% url 'storefront:product_detail' slug=product.slug %}">
+        <span>View Details &amp; Sizing</span> <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="product-meta">
+    <!-- Brand / Department Tag -->
+    <div class="product-category d-flex align-items-center justify-content-between">
+      <span>{{ product.brand|default:'AURA EDIT' }}</span>
+      {% if product.size_label %}
+        <span class="product-size-pill">{{ product.size_label|truncatechars:18 }}</span>
+      {% endif %}
+    </div>
+
+    <!-- Title -->
+    <h3 class="product-title">
+      <a href="{% url 'storefront:product_detail' slug=product.slug %}" title="{{ product.title }}">{{ product.title }}</a>
+    </h3>
+
+    <!-- Star Rating & Review Count Proof -->
+    <div class="product-rating-row">
+      <div class="star-rating" title="{{ product.rating }} out of 5 stars">
+        <i class="fa-solid fa-star text-gold"></i>
+        <i class="fa-solid fa-star text-gold"></i>
+        <i class="fa-solid fa-star text-gold"></i>
+        <i class="fa-solid fa-star text-gold"></i>
+        <i class="fa-solid fa-star-half-stroke text-gold"></i>
+      </div>
+      <span class="rating-number">{{ product.rating }}</span>
+      <span class="review-count">({{ product.review_count }})</span>
+      <span class="badge-assured"><i class="fa-solid fa-shield-check text-gold"></i> Assured</span>
+    </div>
+
+    <!-- Pricing Display (Selling Price, MRP Strikethrough, Savings) -->
+    <div class="product-pricing">
+      <div class="d-flex align-items-baseline gap-2">
+        <strong class="current-price">₹{{ product.price }}</strong>
+        <span class="mrp-price text-decoration-line-through">₹{{ product.mrp }}</span>
+      </div>
+      <span class="savings-tag">Save ₹{{ product.savings }}</span>
+    </div>
+
+    <!-- Delivery Promise -->
+    <div class="delivery-promise">
+      <i class="fa-solid fa-truck-fast text-success me-1"></i>
+      <span>FREE Express Delivery by <strong>Tomorrow, 5 PM</strong></span>
+    </div>
+
+    <!-- Stock Status & Instant Add to Cart -->
+    <div class="product-bottom-action mt-2 pt-2 border-top">
+      {% if product.in_stock %}
+        <div class="d-flex align-items-center gap-2">
+          <form action="{% url 'cart:cart_add' product_id=product.id %}" method="post" class="flex-grow-1">
+            {% csrf_token %}
+            <input type="hidden" name="quantity" value="1">
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="btn-card-add">
+              <i class="fa-solid fa-bag-shopping me-1"></i> Add to Bag
+            </button>
+          </form>
+          <a href="{% url 'storefront:product_detail' slug=product.slug %}" class="btn-card-quickview" title="Inspect piece and gallery">
+            <i class="fa-regular fa-eye"></i>
+          </a>
+        </div>
+      {% else %}
+        <button class="btn-card-add disabled" disabled>
+          <i class="fa-solid fa-ban me-1"></i> Sold Out
+        </button>
+      {% endif %}
+    </div>
+  </div>
+</article>

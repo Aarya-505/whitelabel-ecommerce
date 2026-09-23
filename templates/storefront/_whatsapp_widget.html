@@ -1,0 +1,152 @@
+<!-- ==========================================================================
+     AURA — FLOATING WHATSAPP STORE CHATBOT & VENDOR CONCIERGE WIDGET
+     ========================================================================== -->
+<div class="whatsapp-widget-container" id="auraWhatsappWidget">
+  <!-- Interactive Chat Drawer / Pop-up -->
+  <div class="whatsapp-chat-box" id="whatsappChatBox" aria-hidden="true">
+    <!-- Chat Header -->
+    <div class="whatsapp-chat-header d-flex align-items-center justify-content-between p-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="whatsapp-avatar position-relative">
+          <div class="avatar-circle">
+            <i class="fa-solid fa-store text-white"></i>
+          </div>
+          <span class="online-indicator"></span>
+        </div>
+        <div class="store-info">
+          <div class="d-flex align-items-center gap-1">
+            <strong class="store-name text-white fs-sm">AURA Maison Store</strong>
+            <i class="fa-solid fa-circle-check text-success-light fs-xs" title="Verified Store"></i>
+          </div>
+          <span class="reply-status fs-2xs text-white-50">Online · Replies in ~2 mins</span>
+        </div>
+      </div>
+      <button type="button" class="btn-close-chat" id="closeWhatsappChat" aria-label="Close Chat">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Chat Messages Body -->
+    <div class="whatsapp-chat-body p-3">
+      <!-- Concierge Welcome Bubble -->
+      <div class="chat-bubble incoming">
+        <div class="bubble-sender"><i class="fa-solid fa-sparkles text-gold me-1"></i> AURA Stylist & Support</div>
+        <p class="mb-1">Namaste & Welcome! 👋</p>
+        <p class="mb-0">Looking for kurti sizing, express delivery info, or personalized style recommendations? We're right here to assist you!</p>
+        <span class="bubble-time" id="chatBubbleTime">Just now</span>
+      </div>
+
+      {% if product %}
+      <!-- Active Product Context Card inside Chat -->
+      <div class="chat-product-preview p-2 my-2 rounded-3 border bg-white shadow-2xs d-flex align-items-center gap-2">
+        <img src="{{ product.image_url }}" alt="{{ product.title }}" class="rounded-2" style="width: 44px; height: 44px; object-fit: cover;">
+        <div class="flex-grow-1 overflow-hidden">
+          <span class="fs-2xs text-muted text-uppercase d-block">{{ product.category.name|default:'Selected Piece' }}</span>
+          <strong class="fs-xs text-dark d-block text-truncate">{{ product.title }}</strong>
+          <span class="text-gold fw-bold fs-xs">₹{{ product.price }}</span>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Quick Action Prompt Chips (Interactive Fast Queries) -->
+      <div class="quick-prompts mt-3">
+        <span class="fs-2xs text-muted text-uppercase letter-spacing-1 d-block mb-2">⚡ Quick Inquiries:</span>
+        <div class="d-flex flex-column gap-2">
+          {% if product %}
+            <button type="button" class="quick-prompt-btn text-start" onclick="sendWhatsappPrompt('Hi AURA Store, I need sizing & fabric help for {{ product.title|escapejs }} (₹{{ product.price }}). Is it available for fast dispatch?')">
+              👗 <span class="ms-1">Sizing & fabric for this piece</span>
+            </button>
+          {% else %}
+            <button type="button" class="quick-prompt-btn text-start" onclick="sendWhatsappPrompt('Hi AURA Store, could you please help me pick the right kurti set and size for an upcoming occasion?')">
+              👗 <span class="ms-1">Kurti & Outfit Sizing Guide</span>
+            </button>
+          {% endif %}
+          <button type="button" class="quick-prompt-btn text-start" onclick="sendWhatsappPrompt('Hi AURA, I would like to track my order status and delivery timeline.')">
+            📦 <span class="ms-1">Track my order status</span>
+          </button>
+          <button type="button" class="quick-prompt-btn text-start" onclick="sendWhatsappPrompt('Hi AURA Store, do you have any active VIP discounts or festival offers today?')">
+            🔥 <span class="ms-1">Get today\'s exclusive coupon code</span>
+          </button>
+          <button type="button" class="quick-prompt-btn text-start" onclick="sendWhatsappPrompt('Hi AURA Concierge, I would like to speak directly with the store owner/stylist.')">
+            💬 <span class="ms-1">Chat directly with Store Stylist</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Footer Input Form -->
+    <div class="whatsapp-chat-footer p-2 border-top bg-white">
+      <form id="whatsappCustomForm" onsubmit="event.preventDefault(); submitCustomWhatsapp();" class="d-flex align-items-center gap-2">
+        <input type="text" id="whatsappUserInput" class="form-control form-control-sm whatsapp-input" placeholder="Type your question..." aria-label="Type message">
+        <button type="submit" class="btn btn-whatsapp-send" aria-label="Send to WhatsApp">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Floating Trigger Button -->
+  <button type="button" class="whatsapp-float-btn" id="toggleWhatsappChat" aria-label="Open WhatsApp Store Chat" title="Chat with Store on WhatsApp">
+    <div class="whatsapp-icon-wrap position-relative">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span class="pulse-ring"></span>
+      <span class="status-dot"></span>
+    </div>
+    <span class="whatsapp-label d-none d-md-inline-block">Chat with Store</span>
+  </button>
+</div>
+
+<script>
+(function() {
+  const STORE_WHATSAPP_PHONE = '919876543210'; // Vendor WhatsApp business number
+  const toggleBtn = document.getElementById('toggleWhatsappChat');
+  const closeBtn = document.getElementById('closeWhatsappChat');
+  const chatBox = document.getElementById('whatsappChatBox');
+  const userInput = document.getElementById('whatsappUserInput');
+  const timeEl = document.getElementById('chatBubbleTime');
+
+  if (timeEl) {
+    const now = new Date();
+    timeEl.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  }
+
+  function toggleBox() {
+    if (!chatBox) return;
+    const isOpen = chatBox.classList.contains('active');
+    if (isOpen) {
+      chatBox.classList.remove('active');
+      chatBox.setAttribute('aria-hidden', 'true');
+    } else {
+      chatBox.classList.add('active');
+      chatBox.setAttribute('aria-hidden', 'false');
+      setTimeout(() => { if (userInput) userInput.focus(); }, 150);
+    }
+  }
+
+  if (toggleBtn) toggleBtn.addEventListener('click', toggleBox);
+  if (closeBtn) closeBtn.addEventListener('click', () => {
+    if (chatBox) {
+      chatBox.classList.remove('active');
+      chatBox.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  window.sendWhatsappPrompt = function(message) {
+    const cleanPhone = STORE_WHATSAPP_PHONE.replace(/[^0-9]/g, '');
+    const encoded = encodeURIComponent(message);
+    const url = `https://wa.me/${cleanPhone}?text=${encoded}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  window.submitCustomWhatsapp = function() {
+    const text = (userInput ? userInput.value : '').trim();
+    if (!text) {
+      if (userInput) userInput.focus();
+      return;
+    }
+    window.sendWhatsappPrompt(text);
+    if (userInput) userInput.value = '';
+    if (chatBox) chatBox.classList.remove('active');
+  };
+})();
+</script>

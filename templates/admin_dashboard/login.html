@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Vendor & Admin Portal | AURA Commerce</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="bg-slate-900 d-flex align-items-center justify-content-center min-vh-100 py-5" style="background: radial-gradient(circle at top, #1e293b 0%, #0b0f19 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5 col-xl-4">
+                <div class="card border-0 rounded-4 shadow-2xl p-4 p-md-5 bg-white">
+                    <!-- Brand Header -->
+                    <div class="text-center mb-4">
+                        <div class="mb-2">
+                            <a class="brand text-decoration-none d-inline-flex align-items-center gap-2" href="{% url 'storefront:home' %}">
+                                <span class="brand-mark bg-slate-900 text-white rounded-circle d-inline-grid place-items-center fw-bold" style="width: 36px; height: 36px;">A</span>
+                                <span class="brand-text font-serif fs-3 tracking-wider text-dark fw-bold">AURA</span>
+                            </a>
+                        </div>
+                        <span class="badge bg-gold-light text-gold text-uppercase letter-spacing-1 fs-xs py-1 px-3 rounded-pill mb-2">
+                            <i class="fa-solid fa-user-shield me-1"></i> Shop Vendor & Admin Portal
+                        </span>
+                        <h3 class="font-serif fs-2 fw-bold text-slate-900 mb-1">Store Owner Login</h3>
+                        <p class="text-muted fs-xs mb-0">Restricted to authorized store vendors and staff administrators only.</p>
+                    </div>
+
+                    {% if is_already_authenticated %}
+                        <div class="alert alert-warning border-0 rounded-3 fs-xs py-2 px-3 mb-3 text-start" role="alert">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <i class="fa-solid fa-user-check me-1 text-gold"></i>
+                                    Active Admin: <strong>{{ request.user.username }}</strong>
+                                </div>
+                                <a href="{% url 'admin_dashboard:overview' %}" class="btn btn-dark btn-sm py-0 px-2 fs-xs text-gold text-decoration-none">Dashboard →</a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if is_customer_logged_in %}
+                        <!-- Access Denied Prompt for Logged In Customers -->
+                        <div class="text-center py-3">
+                            <div class="mb-3">
+                                <span class="rounded-circle bg-danger bg-opacity-10 text-danger p-3 d-inline-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                                    <i class="fa-solid fa-ban fs-2"></i>
+                                </span>
+                            </div>
+                            <h4 class="font-serif fs-4 fw-bold text-danger mb-2">No Access to This Portal</h4>
+                            <p class="text-muted fs-xs mb-4">
+                                You do not have permission to access the Store Owner Management Dashboard. Your current login (<strong>{{ request.user.username }}</strong>) is a Customer account.
+                            </p>
+                            <div class="d-flex flex-column gap-2">
+                                <a href="{% url 'storefront:home' %}" class="btn btn-dark w-100 rounded-pill py-2 text-gold fw-bold shadow-sm fs-xs">
+                                    <i class="fa-solid fa-arrow-left me-1"></i> Return to Shopping Storefront
+                                </a>
+                                <a href="{% url 'storefront:user_logout' %}?next={% url 'admin_dashboard:login' %}" class="btn btn-outline-secondary w-100 rounded-pill py-2 fs-xs fw-semibold">
+                                    <i class="fa-solid fa-right-from-bracket me-1"></i> Sign Out to Log In as Vendor
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Standard Clean Vendor Login Form (Unauthenticated) -->
+                        {% if messages %}
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags|default:'danger' }} rounded-3 fs-xs py-2 mb-3" role="alert">
+                                <i class="fa-solid fa-circle-exclamation me-1"></i> {{ message }}
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form action="{% url 'admin_dashboard:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" method="POST">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="id_username" class="form-label fs-xs fw-bold text-uppercase text-muted letter-spacing-1">Vendor Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-regular fa-user"></i></span>
+                                    <input type="text" name="username" id="id_username" class="form-control bg-light border-start-0" placeholder="Enter shop vendor username" required autofocus>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="id_password" class="form-label fs-xs fw-bold text-uppercase text-muted letter-spacing-1">Vendor Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
+                                    <input type="password" name="password" id="id_password" class="form-control bg-light border-start-0" placeholder="Enter admin password" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 text-gold fw-bold shadow-sm mb-3">
+                                Log In to Vendor Dashboard <i class="fa-solid fa-arrow-right ms-2"></i>
+                            </button>
+                        </form>
+
+                        <div class="pt-2 border-top text-center">
+                            <a href="{% url 'storefront:home' %}" class="text-decoration-none fs-xs text-muted hover-gold">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Return to Storefront Catalog
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Your Private Wishlist — AURA Modern Luxury{% endblock %}
+
+{% block content %}
+<section class="section-space pt-4 pt-lg-5">
+  <div class="container">
+    <div class="section-heading mb-4 reveal">
+      <div>
+        <span class="eyebrow"><i class="fa-solid fa-heart text-gold me-1"></i> PRIVATE ARCHIVE</span>
+        <h1>Saved Wishlist</h1>
+        <p class="section-subtitle">{{ products|length }} piece{{ products|length|pluralize }} saved for consideration.</p>
+      </div>
+      {% if products %}
+        <a href="{% url 'storefront:home' %}#shop" class="btn btn-sm btn-outline-dark">
+          <i class="fa-solid fa-plus me-1"></i> Discover More Pieces
+        </a>
+      {% endif %}
+    </div>
+
+    {% if products %}
+      <div class="row g-4">
+        {% for product in products %}
+          <div class="col-12 col-sm-6 col-md-4 col-lg-3 reveal">
+            <div class="wishlist-card-wrapper position-relative">
+              {% include 'storefront/_product_card.html' with product=product %}
+              
+              <!-- Additional Instant Wishlist Actions -->
+              <div class="wishlist-direct-actions d-flex gap-2 mt-2">
+                {% if product.in_stock %}
+                  <form action="{% url 'cart:cart_add' product_id=product.id %}" method="post" class="flex-grow-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn btn-sm btn-dark w-100 py-2 fs-xs">
+                      <i class="fa-solid fa-bag-shopping me-1"></i> Move to Bag
+                    </button>
+                  </form>
+                {% endif %}
+                
+                <form action="{% url 'storefront:toggle_wishlist' product_id=product.id %}" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger py-2 px-3 fs-xs" title="Remove from Wishlist">
+                    <i class="fa-regular fa-trash-can"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state large py-5 reveal">
+        <i class="fa-regular fa-heart text-muted fs-1 mb-3"></i>
+        <h2>Your Private Wishlist Is Waiting</h2>
+        <p class="text-muted mb-4">Click the heart icon on any piece across our catalog to archive it here.</p>
+        <a class="btn btn-gold px-4 py-3" href="{% url 'storefront:home' %}#shop">
+          Explore The Full Collection <i class="fa-solid fa-arrow-right ms-1"></i>
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
